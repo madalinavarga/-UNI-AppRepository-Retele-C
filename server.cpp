@@ -11,9 +11,8 @@
 #include <fcntl.h>
 #define FALSE 0
 #define TRUE 1
-
 #define PORT 4444
-#define filename "executat.txt"
+#define config_file "config.txt"
 
 void readFromSocket(char *buff, int fd);
 void writeInSocket(char buffer[], int fd);
@@ -113,12 +112,21 @@ void handle_child(int client_fd, char *msg)
         {
             //search in a file for username and see the password if is ok ->login else -> wrong
             char *userAccountDetails = getInputCommand(msg);
-            // int found=searchUserAccount();//ceva
+            int found = checkExistingUser(userAccountDetails);
+            if (found != 0)
+            {
+                isLogged = TRUE;
+                //scriu ceva la server?
+                //cod
+                strcpy(msg, "Logged in");
+                writeInSocket(msg, client_fd);
+            }
+            else
+            {
+                strcpy(msg, "User does not exist");
+                writeInSocket(msg, client_fd);
+            }
         }
-
-        //cod
-        strcpy(msg, "madalina");
-        writeInSocket(msg, client_fd);
     }
 }
 char *getInputCommand(char *inputString) //login: madalina parola
@@ -131,7 +139,7 @@ char *getInputCommand(char *inputString) //login: madalina parola
 
 int checkExistingUser(char *wordToFind)
 {
-    FILE *configFd = fopen("config", "r");
+    FILE *configFd = fopen(config_file, "r");
     char wordAux[100];
     int count = 0;
 
