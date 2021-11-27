@@ -20,8 +20,6 @@ void handle_child(int client_fd, char *msg);
 char *getInputCommand(char *);
 int checkExistingUser(char *);
 
-char *readFile(char *);
-
 int main(int argc, char *argv[])
 {
 
@@ -175,21 +173,4 @@ void writeInSocket(char buffer[], int fd)
         perror("[client]Eroare la write() spre server.\n");
         //return errno;
     }
-}
-
-char *readFile(char *file)
-{
-    FILE *file_fd = fopen(filename, "r");
-    // interesant
-    fseek(file_fd, 0, SEEK_END); //merg la final de fisier
-    long fsize = ftell(file_fd); //iau pozitia
-    fseek(file_fd, 0, SEEK_SET); //merg la inceput de fisier
-
-    char *fileContent = (char *)malloc(fsize + 1);
-    fread(fileContent, 1, fsize, file_fd);
-    fclose(file_fd);
-
-    fileContent[fsize] = 0;
-
-    return fileContent;
 }
