@@ -18,6 +18,8 @@
 void readFromSocket(char *buff, int fd);
 void writeInSocket(char buffer[], int fd);
 void handle_child(int client_fd, char *msg);
+char *getInputCommand(char *);
+int checkExistingUser(char *);
 
 char *readFile(char *);
 
@@ -107,11 +109,45 @@ void handle_child(int client_fd, char *msg)
             close(client_fd);
             exit(0);
         }
+        else if (strstr(msg, "login : "))
+        {
+            //search in a file for username and see the password if is ok ->login else -> wrong
+            char *userAccountDetails = getInputCommand(msg);
+            // int found=searchUserAccount();//ceva
+        }
 
         //cod
         strcpy(msg, "madalina");
         writeInSocket(msg, client_fd);
     }
+}
+char *getInputCommand(char *inputString) //login: madalina parola
+{
+    char *subString;
+    subString = strrchr(inputString, ':') + 1;
+    subString[strlen(subString) - 1] = '\0';
+    return subString; // return madalina parola
+}
+
+int checkExistingUser(char *wordToFind)
+{
+    FILE *configFd = fopen("config", "r");
+    char wordAux[100];
+    int count = 0;
+
+    while (1)
+    {
+        if (fscanf(configFd, "%s", wordAux) == EOF)
+            break;
+
+        if (strcmp(wordAux, wordToFind) == 0)
+        {
+            count++;
+            break;
+        }
+    }
+    fclose(configFd);
+    return count;
 }
 void readFromSocket(char *buff, int fd)
 {
