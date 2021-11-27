@@ -9,10 +9,25 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <iostream>
 #define FALSE 0
 #define TRUE 1
 #define PORT 4444
 #define config_file "config.txt"
+
+using namespace std;
+
+class AppDetails
+{
+private:
+    string name;
+    string about;
+    float price;
+    float ramMemory;
+    float version;
+
+public:
+};
 
 void readFromSocket(char *buff, int fd);
 void writeInSocket(char buffer[], int fd);
@@ -124,6 +139,11 @@ void handle_child(int client_fd, char *msg)
                 strcpy(msg, "User does not exist");
                 writeInSocket(msg, client_fd);
             }
+        }
+        else if (strstr(msg, "addNewApp: "))
+        {
+            char *fileDetails = getInputCommand(msg);
+            // functie sa citeasca si sa pun in structura or something
         }
     }
 }
