@@ -9,14 +9,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#define FALSE 0
+#define TRUE 1
 
 #define PORT 4444
 #define filename "executat.txt"
 
 void readFromSocket(char *buff, int fd);
 void writeInSocket(char buffer[], int fd);
-char *getInputCommand(char *);
-void executeCommand(char *);
+void handle_child(int client_fd, char *msg);
+
 char *readFile(char *);
 
 int main(int argc, char *argv[])
@@ -55,7 +57,9 @@ int main(int argc, char *argv[])
     {
 
         int client;
-        int length = sizeof(clientStruct);
+        socklen_t length; //am modificat
+        length = sizeof(clientStruct);
+
         printf("[server]Asteptam la portul %d...\n", PORT);
         fflush(stdout);
 
@@ -84,43 +88,31 @@ int main(int argc, char *argv[])
         {
             //copil
             close(sd);
-            while (1)
-            {
-                readFromSocket(msg, client);
-                printf("\nmesaj:%s", msg);
-                if (strstr(msg, "quit"))
-                {
-                    printf("[client]Mesajul primit este: %s. byee client\n", msg);
-                    writeInSocket(msg, client);
-                    close(client);
-                    exit(0);
-                }
-
-                //cod
-                strcpy(msg, "madalina");
-                writeInSocket(msg, client);
-            }
+            handle_child(client, msg);
         }
     }
 }
 
-char *readFile(char *file)
+void handle_child(int client_fd, char *msg)
 {
-    FILE *file_fd = fopen(filename, "r");
-    // interesant
-    fseek(file_fd, 0, SEEK_END); //merg la final de fisier
-    long fsize = ftell(file_fd); //iau pozitia
-    fseek(file_fd, 0, SEEK_SET); //merg la inceput de fisier
+    int isLogged = FALSE;
+    while (1)
+    {
+        readFromSocket(msg, client_fd);
+        printf("\nmesaj:%s", msg);
+        if (strstr(msg, "quit"))
+        {
+            printf("[client]Mesajul primit este: %s. byee client\n", msg);
+            writeInSocket(msg, client_fd);
+            close(client_fd);
+            exit(0);
+        }
 
-    char *fileContent = malloc(fsize + 1);
-    fread(fileContent, 1, fsize, file_fd);
-    fclose(file_fd);
-
-    fileContent[fsize] = 0;
-
-    return fileContent;
+        //cod
+        strcpy(msg, "madalina");
+        writeInSocket(msg, client_fd);
+    }
 }
-
 void readFromSocket(char *buff, int fd)
 {
     bzero(buff, 100);
@@ -139,4 +131,21 @@ void writeInSocket(char buffer[], int fd)
         perror("[client]Eroare la write() spre server.\n");
         //return errno;
     }
+}
+
+char *readFile(char *file)
+{
+    FILE *file_fd = fopen(filename, "r");
+    // interesant
+    fseek(file_fd, 0, SEEK_END); //merg la final de fisier
+    long fsize = ftell(file_fd); //iau pozitia
+    fseek(file_fd, 0, SEEK_SET); //merg la inceput de fisier
+
+    char *fileContent = (char *)malloc(fsize + 1);
+    fread(fileContent, 1, fsize, file_fd);
+    fclose(file_fd);
+
+    fileContent[fsize] = 0;
+
+    return fileContent;
 }

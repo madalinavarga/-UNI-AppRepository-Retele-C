@@ -14,10 +14,12 @@ Adaugarea de noi aplicatii se va putea realiza de oricare client, specificindu-s
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
+#include <signal.h>
 
 int port;
 void writeInSocket(char buffer[], int fd);
 void readFromSocket(char *buff, int fd);
+void handle_signal(int sig);
 
 int main(int argc, char *argv[])
 {
@@ -50,6 +52,7 @@ int main(int argc, char *argv[])
         perror("[client]Eroare la connect().\n");
         return errno;
     }
+    signal(SIGQUIT, handle_signal);
     while (1)
     {
         bzero(msg, 100);
@@ -86,4 +89,10 @@ void readFromSocket(char *buff, int fd)
         perror("[client]Eroare la read() de la server.\n");
         //return errno;
     }
+}
+
+void handle_signal(int sig)
+{
+
+    signal(sig, SIG_DFL);
 }
