@@ -9,24 +9,24 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <iostream>
+
 #define FALSE 0
 #define TRUE 1
 #define PORT 4444
 #define config_file "config.txt"
 
-using namespace std;
-
 class AppDetails
 {
-private:
-    string name;
-    string about;
+public:
+    char *name;
+    char *about;
+    char *author;
+    char *website;
+    char *systemRequirements;
     float price;
     float ramMemory;
     float version;
-
-public:
+    char *otherDetails;
 };
 
 void readFromSocket(char *buff, int fd);
@@ -142,8 +142,36 @@ void handle_child(int client_fd, char *msg)
         }
         else if (strstr(msg, "addNewApp: "))
         {
-            char *fileDetails = getInputCommand(msg);
-            // functie sa citeasca si sa pun in structura or something
+            char *filePath = getInputCommand(msg);
+            // functie sa citeasca json + sa desparta
+        }
+        else if (strstr(msg, "newUser: "))
+        {
+            char *filePath = getInputCommand(msg);
+            //de luat detalii +
+        }
+        else if (strstr(msg, "seeMore: "))
+        {
+        }
+        else if (strstr(msg, "update: ")) //nume utilizator si nume aplciatie
+        {
+            // verifici daca e logat
+            // iau nume utilizator => user
+            // iau id aplicatie => id
+
+            //verific daca utilizator==owner
+            // gasit = false
+            // for (aplicatie in aplicatii)
+            // if (aplicatie->name == id && aplicatie->owner == owner )
+            // {
+            // update + gasit = true
+            // }
+
+            // daca gasit e false zici ca nu ai gasit, daca nu, zici ca a fost updatat
+        }
+        else
+        {
+            //default
         }
     }
 }

@@ -1,0 +1,38 @@
+Functii:
+1 login (exista utilizator?)
+2 inregistrare (numeUtilizator existent? + adaugare in fisier/bd)
+3 vizualizare aplicatii (pt link L)
+4 incarcare aplicatii noi (L) ( ce cer)
+5 update/modificari aplicatia incarcata (legare aplicatie owner)
+5* feedback(L) + rating
+6* ordonare dupa rating
+
+Ce cer:
+name
+about
+pricing
+system requiremets (linux,windows...)
+author
+version/founded
+ramMemory
+processor
+WEBSITE
+frequently asked question maybeee: text 
+utilizare pt firma/personal??
+integrare? idk ce i asta
+ 
+
+dupa ce fac filtru:
+nume
+free/paid
+sistem de operare(windows,iphone,linux)
+
+
+
+
+feedback (L)
+ce cer: statut:student/prof..
+cat de des l-a folosit...
+user role:??
+nota:
+descriere:
