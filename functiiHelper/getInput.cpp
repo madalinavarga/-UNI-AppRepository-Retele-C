@@ -16,6 +16,12 @@ char *getInputCommand(char *inputString) //login: madalina parola
     subString[strlen(subString) - 1] = '\0';
     return subString; // return madalina parola
 }
+char *getUserName(char *subString)
+{
+    char delim[] = " ";
+    char *ptr_name = strtok(subString, delim);
+    return ptr_name;
+}
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +29,10 @@ int main(int argc, char *argv[])
     fflush(stdout);
     char nume[100];
     read(0, nume, 100); //change
-    char *ceva = nume;
-    char *rezultat = getInputCommand(ceva);
-    printf("<%s>\n", rezultat);
+    char *rezultat = getInputCommand(nume);
+    char *ptr = getUserName(rezultat);
+    printf("<%s>\n", ptr);
+    char numme[20];
+    strcpy(numme, ptr);
+    printf("<%s>", numme);
 }
