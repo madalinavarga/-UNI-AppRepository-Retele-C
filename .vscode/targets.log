@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Nov 28 14:16:14 2021
+# Make data base, printed on Tue Nov 30 06:53:56 2021
 
 # Variables
 
@@ -43,11 +43,9 @@ SHELL = /bin/sh
 # environment
 GDM_LANG = en_US
 # environment
-VTE_VERSION = 6003
-# environment
 VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
 # environment
-_ = /usr/bin/code
+_ = /usr/share/code/code
 # environment
 QT_AUTO_SCREEN_SCALE_FACTOR = 0
 # environment
@@ -58,6 +56,8 @@ GTK_OVERLAY_SCROLLING = 0
 MAKEFILE_LIST :=  Makefile
 # automatic
 @F = $(notdir $@)
+# environment
+GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
@@ -77,21 +77,19 @@ LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 LC_NAME = ro_RO.UTF-8
 # environment
-VSCODE_CWD = /home/madalinavarga21/Desktop/Retele/ProiectFinal
+VSCODE_CWD = /home/madalinavarga21
 # environment
 XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
-PATH = /home/madalinavarga21/anaconda3/bin:/home/madalinavarga21/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/madalinavarga21/.local/bin:/home/madalinavarga21/anaconda3/bin:/home/madalinavarga21/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
-SESSION_MANAGER = local/madalinavarga21-X555LJ:@/tmp/.ICE-unix/1041,unix/madalinavarga21-X555LJ:/tmp/.ICE-unix/1041
+SESSION_MANAGER = local/madalinavarga21-X555LJ:@/tmp/.ICE-unix/1101,unix/madalinavarga21-X555LJ:/tmp/.ICE-unix/1101
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
-# environment
-WINDOWID = 58720262
 # environment
 VSCODE_LOG_STACK = false
 # environment
@@ -101,11 +99,13 @@ VSCODE_CRASH_REPORTER_START_OPTIONS = {"companyName":"Microsoft","productName":"
 # environment
 XDG_GREETER_DATA_DIR = /var/lib/lightdm-data/madalinavarga21
 # environment
-LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+LS_COLORS = 
 # environment
 XDG_SESSION_DESKTOP = mate
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
+# environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 3054
 # automatic
 %F = $(notdir $%)
 # environment
@@ -123,7 +123,7 @@ QT_QPA_PLATFORMTHEME = qt5ct
 # environment
 XDG_SEAT = seat0
 # environment
-SSH_AGENT_PID = 1125
+SSH_AGENT_PID = 1185
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = MATE
 # environment
@@ -135,8 +135,6 @@ HOME = /home/madalinavarga21
 # environment
 LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
-VSCODE_CLI = 1
-# environment
 VSCODE_CODE_CACHE_PATH = /home/madalinavarga21/.config/Code/CachedData/ccbaa2d27e38e5afa3e5c21c1c7bef4657064247
 # environment
 LOGNAME = madalinavarga21
@@ -144,8 +142,6 @@ LOGNAME = madalinavarga21
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # automatic
 +F = $(notdir $+)
-# environment
-ELECTRON_NO_ATTACH_CONSOLE = 1
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
@@ -158,8 +154,6 @@ XDG_VTNR = 7
 CLUTTER_BACKEND = x11
 # environment
 MAKELEVEL := 0
-# environment
-COLORTERM = truecolor
 # default
 MAKE = $(MAKE_COMMAND)
 # default
@@ -167,9 +161,9 @@ MAKECMDGOALS := all
 # environment
 QT_IM_MODULE = ibus
 # environment
-SHLVL = 1
+SHLVL = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-5a0966df-c534-4d29-a042-1f7e5d710db8.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-70fc0227-b809-4302-8634-8dc07556bd99.sock
 # environment
 COMPIZ_CONFIG_PROFILE = mint
 # environment
@@ -251,11 +245,9 @@ LC_ADDRESS = ro_RO.UTF-8
 # environment
 LANG = C
 # environment
-TERM = xterm-256color
-# environment
-VSCODE_PID = 1673
+VSCODE_PID = 3054
 # variable set hash-table stats:
-# Load=122/1024=12%, Rehash=0, Collisions=14/150=9%
+# Load=118/1024=12%, Rehash=0, Collisions=11/146=8%
 
 # Pattern-specific Variable Values
 
@@ -291,7 +283,6 @@ all:
 # automatic
 # | := 
 # automatic
- 
 # < := 
 # automatic
 # ^ := 
@@ -299,6 +290,7 @@ all:
 # ? := 
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
+ 
 #  recipe to execute (from 'Makefile', line 2):
 		g++ server.cpp -o server
 		g++ client.cpp -o client
@@ -343,6 +335,6 @@ clean:
 # strcache performance: lookups = 27 / hit rate = 29%
 # hash-table stats:
 # Load=19/8192=0%, Rehash=0, Collisions=1/27=4%
-# Finished Make data base on Sun Nov 28 14:16:14 2021
+# Finished Make data base on Tue Nov 30 06:53:56 2021
 
  

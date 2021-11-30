@@ -14,19 +14,29 @@
 #define TRUE 1
 #define PORT 4444
 #define config_file "config.txt"
+#define apps_file "apps.txt"
+using namespace std;
+int id = 0;
 
 class AppDetails
 {
 public:
+    int id = 0;
+    char *owner;
     char *name;
     char *about;
     char *author;
-    char *website;
+    char *websiteLink;
     char *systemRequirements;
-    float price;
-    float ramMemory;
-    float version;
+    char *price;
+    char *ramMemory;
+    char *version;
     char *otherDetails;
+
+    AppDetails(char *owner);
+    void setFromFile(char *fileName);
+    void setField(char field[], char value[]);
+    char *toString();
 };
 
 void readFromSocket(char *buff, int fd);
@@ -34,6 +44,8 @@ void writeInSocket(char buffer[], int fd);
 void handle_child(int client_fd, char *msg);
 char *getInputCommand(char *);
 int checkExistingUser(char *);
+char *readFile(char *file);
+void writeInFile(char *output_string);
 
 int main(int argc, char *argv[])
 {
@@ -221,4 +233,106 @@ void writeInSocket(char buffer[], int fd)
         perror("[client]Eroare la write() spre server.\n");
         //return errno;
     }
+}
+char *readFile(char *file)
+{
+    FILE *file_fd = fopen(file, "r");
+
+    fseek(file_fd, 0, SEEK_END);     //merg la final de fisier
+    long file_size = ftell(file_fd); //iau pozitia
+    fseek(file_fd, 0, SEEK_SET);     //merg la inceput de fisier
+
+    char *fileContent = (char *)malloc(file_size + 1);
+    fread(fileContent, 1, file_size, file_fd);
+    fclose(file_fd);
+
+    fileContent[file_size] = 0;
+
+    return fileContent;
+}
+
+AppDetails::AppDetails(char *owner)
+{
+    this->owner = (char *)malloc(strlen(owner) + 1);
+    strcpy(this->owner, owner);
+    this->id = id;
+    id++;
+}
+
+void AppDetails::setFromFile(char *fileName)
+{
+    char *contents = readFile(fileName);
+    char delim[] = "{},:\" \t\n";
+
+    char *field = strtok(contents, delim);
+    char *value = strtok(NULL, delim);
+    while (field)
+    {
+        setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
+        field = strtok(NULL, delim);
+        value = strtok(NULL, delim);
+    }
+}
+
+void AppDetails::setField(char field[], char value[])
+{
+
+    char *otherDetails;
+    if (strcmp(field, "owner") == 0)
+    {
+        this->owner = (char *)malloc(strlen(value) + 1);
+        strcpy(this->owner, value);
+    }
+    else if (strcmp(field, "name") == 0)
+    {
+        this->name = (char *)malloc(strlen(value) + 1);
+        strcpy(this->name, value);
+    }
+    else if (strcmp(field, "about") == 0)
+    {
+        this->about = (char *)malloc(strlen(value) + 1);
+        strcpy(this->about, value);
+    }
+    else if (strcmp(field, "websiteLink") == 0)
+    {
+        this->websiteLink = (char *)malloc(strlen(value) + 1);
+        strcpy(this->websiteLink, value);
+    }
+    else if (strcmp(field, "systemRequirements") == 0)
+    {
+        this->systemRequirements = (char *)malloc(strlen(value) + 1);
+        strcpy(this->systemRequirements, value);
+    }
+    else if (strcmp(field, "price") == 0)
+    {
+        this->price = (char *)malloc(strlen(value) + 1);
+        strcpy(this->price, value);
+    }
+    else if (strcmp(field, "ramMemory") == 0)
+    {
+        this->ramMemory = (char *)malloc(strlen(value) + 1);
+        strcpy(this->ramMemory, value);
+    }
+    else if (strcmp(field, "version") == 0)
+    {
+        this->version = (char *)malloc(strlen(value) + 1);
+        strcpy(this->version, value);
+    }
+    // else return false
+}
+
+char *AppDetails::toString()
+{
+
+    char *finalString = (char *)malloc(1000); //change it
+    sprintf(finalString, "%d %s %s %s %s %s %s %s %s %s %s", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
+    return finalString;
+}
+
+void writeInFile(char *output_string)
+{
+    FILE *file_fd = fopen(apps_file, "a");
+    strcat(output_string, "\n");
+    fprintf(file_fd, "%s", output_string);
+    fclose(file_fd);
 }

@@ -16,64 +16,31 @@ char *readFile(char *file);
 int id = 0;
 class AppDetails
 {
-public:
+protected:
     int id = 0;
-    char price[100] = "-";
-    char ramMemory[100] = "-";
-    char owner[100];
+    char *price;
+    char *ramMemory;
+    char *owner;
 
-    AppDetails(char *owner)
-    {
-        strcpy(this->owner, owner);
-        this->id = id;
-        id++;
-    }
-
-    void setFromFile(char *fileName)
-    {
-        char *contents = readFile(fileName);
-        char delim[] = "{},:\" \t\n";
-
-        char *field = strtok(contents, delim);
-        char *value = strtok(NULL, delim);
-        while (field)
-        {
-            setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
-            field = strtok(NULL, delim);
-            value = strtok(NULL, delim);
-        }
-    }
-
-    void setField(char field[], char value[])
-    {
-        if (strcmp(field, "price") == 0)
-        {
-            strcpy(this->price, value);
-        }
-        else if (strcmp(field, "ramMemory") == 0)
-        {
-            strcpy(this->ramMemory, value);
-        }
-        // else return false
-    }
-
-    char *toString()
-    {
-        char *finalString = (char *)malloc(1000);
-        sprintf(finalString, "%s %s", this->price, this->ramMemory); //, this->version, this->otherDetails);
-        return finalString;
-    }
+public:
+    AppDetails(char *owner);
+    void setFromFile(char *fileName);
+    void setField(char field[], char value[]);
+    char *toString();
 };
 
 int main(int argc, char *argv[])
 {
     // astea le ai in program
     char fileName[] = "test.json";
+    char name[] = "madalina";
+    char *mada = name;
     // list<AppDetails> listOfApps;
 
     // creezi aplicatie noua
-    AppDetails app("madalina");
+    AppDetails app(mada);
     app.setFromFile(fileName); // daca retuneaza false => bad input
+    printf("%s", app.toString());
 
     // adaugi aplicatie in lista
     // listOfApps.push_back(app);
@@ -103,4 +70,51 @@ char *readFile(char *file)
     fileContent[fsize] = 0;
 
     return fileContent;
+}
+
+AppDetails::AppDetails(char *owner)
+{
+    this->owner = (char *)malloc(strlen(owner) + 1);
+    strcpy(this->owner, owner);
+    this->id = id;
+    id++;
+}
+
+void AppDetails::setFromFile(char *fileName)
+{
+    char *contents = readFile(fileName);
+    char delim[] = "{},:\" \t\n";
+
+    char *field = strtok(contents, delim);
+    char *value = strtok(NULL, delim);
+    while (field)
+    {
+        setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
+        field = strtok(NULL, delim);
+        value = strtok(NULL, delim);
+    }
+}
+
+void AppDetails::setField(char field[], char value[])
+{
+    if (strcmp(field, "price") == 0)
+    {
+        this->price = (char *)malloc(strlen(value) + 1);
+        strcpy(this->price, value);
+        //printf("%s\n", this->price);
+    }
+    else if (strcmp(field, "ramMemory") == 0)
+    {
+        this->ramMemory = (char *)malloc(strlen(value) + 1);
+        strcpy(this->ramMemory, value);
+        // printf("%s\n", this->ramMemory);
+    }
+    // else return false
+}
+
+char *AppDetails::toString()
+{
+    char *finalString = (char *)malloc(1000);
+    sprintf(finalString, "%s %s", this->price, this->ramMemory); //, this->version, this->otherDetails);
+    return finalString;
 }
