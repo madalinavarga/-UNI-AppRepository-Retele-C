@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue Nov 30 06:53:56 2021
+# Make data base, printed on Wed Dec  1 09:10:17 2021
 
 # Variables
 
@@ -105,7 +105,7 @@ XDG_SESSION_DESKTOP = mate
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 3054
+GIO_LAUNCHED_DESKTOP_FILE_PID = 36172
 # automatic
 %F = $(notdir $%)
 # environment
@@ -163,7 +163,7 @@ QT_IM_MODULE = ibus
 # environment
 SHLVL = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-70fc0227-b809-4302-8634-8dc07556bd99.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-c23bfa83-acef-4fb3-86f1-542fc78b994a.sock
 # environment
 COMPIZ_CONFIG_PROFILE = mint
 # environment
@@ -245,7 +245,7 @@ LC_ADDRESS = ro_RO.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 3054
+VSCODE_PID = 36172
 # variable set hash-table stats:
 # Load=118/1024=12%, Rehash=0, Collisions=11/146=8%
 
@@ -255,9 +255,9 @@ VSCODE_PID = 3054
 
 # Directories
 
-# . (device 2054, inode 3295955): 13 files, no impossibilities.
+# . (device 2054, inode 3295955): 14 files, no impossibilities.
 
-# 13 files, no impossibilities in 1 directories.
+# 14 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -290,9 +290,9 @@ all:
 # ? := 
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
- 
 #  recipe to execute (from 'Makefile', line 2):
 		g++ server.cpp -o server
+ 
 		g++ client.cpp -o client
 
 # Not a target:
@@ -329,12 +329,12 @@ clean:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 19 / storage = 166 B / avg = 8 B
-# current buf: size = 8162 B / used = 166 B / count = 19 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 20 / storage = 182 B / avg = 9 B
+# current buf: size = 8162 B / used = 182 B / count = 20 / avg = 9 B
 
-# strcache performance: lookups = 27 / hit rate = 29%
+# strcache performance: lookups = 28 / hit rate = 28%
 # hash-table stats:
-# Load=19/8192=0%, Rehash=0, Collisions=1/27=4%
-# Finished Make data base on Tue Nov 30 06:53:56 2021
+# Load=20/8192=0%, Rehash=0, Collisions=1/28=4%
+# Finished Make data base on Wed Dec  1 09:10:17 2021
 
  

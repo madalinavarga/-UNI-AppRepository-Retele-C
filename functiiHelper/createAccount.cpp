@@ -23,7 +23,7 @@ char *getUserName(char *subString)
     char *ptr_name = strtok(subString, delim);
     return ptr_name;
 }
-int checkExistingUserNameOnly(char *wordToFind)
+int checkExistingUserNameOnly(char *nameToFind)
 {
     FILE *configFd = fopen(config_file, "r");
 
@@ -37,9 +37,9 @@ int checkExistingUserNameOnly(char *wordToFind)
             break;
         else
         {
-            char *ptr = getUserName(wordAux);
+            char *ptr_name = getUserName(wordAux);
 
-            if (strcmp(ptr, wordToFind) == 0)
+            if (strcmp(ptr_name, nameToFind) == 0)
             {
                 count++;
                 break;

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <ctype.h>
 
 #define FALSE 0
 #define TRUE 1
@@ -17,6 +18,7 @@
 #define apps_file "apps.txt"
 using namespace std;
 int id = 0;
+char userName[50];
 
 class AppDetails
 {
@@ -46,7 +48,10 @@ char *getInputCommand(char *);
 int checkExistingUser(char *);
 char *readFile(char *file);
 void writeInFile(char *output_string);
-
+char *getUserName(char *subString);
+char *getUserPassword(char *subString);
+int checkExistingUserNameOnly(char *nameToFind);
+bool validPassword(char *givenPass);
 int main(int argc, char *argv[])
 {
 
@@ -136,13 +141,15 @@ void handle_child(int client_fd, char *msg)
         else if (strstr(msg, "login : "))
         {
             //search in a file for username and see the password if is ok ->login else -> wrong
+            strcpy(userName, " "); // e ok?
+
             char *userAccountDetails = getInputCommand(msg);
-            int found = checkExistingUser(userAccountDetails);
+            int found = checkExistingUser(userAccountDetails); //madalina parola
             if (found != 0)
             {
                 isLogged = TRUE;
-                //scriu ceva la server?
-                //cod
+                char *user_ptr = getUserName(userAccountDetails);
+                strcpy(userName, user_ptr);
                 strcpy(msg, "Logged in");
                 writeInSocket(msg, client_fd);
             }
@@ -154,19 +161,62 @@ void handle_child(int client_fd, char *msg)
         }
         else if (strstr(msg, "addNewApp: "))
         {
-            char *filePath = getInputCommand(msg);
-            // functie sa citeasca json + sa desparta
+            // functie isLogged if yes:
+            char *filePath = getInputCommand(msg); // iau path catre fisier sa citesc din el
+            AppDetails app(userName);
+            app.setFromFile(filePath);
+            char *output_string = app.toString();
+            writeInFile(output_string);
+
+            //else nu ai voie
         }
         else if (strstr(msg, "newUser: "))
         {
             char *filePath = getInputCommand(msg);
-            //de luat detalii +
+            char *new_user_details = readFile(filePath);
+            char *wanted_name = getUserName(new_user_details); //
+            int found = checkExistingUserNameOnly(wanted_name);
+
+            if (found == 0)
+            {
+                // numele nu exista, poti face contul daca parola e ok
+                char *password = getUserPassword(new_user_details);
+                int check_password = validPassword(password);
+                if (check_password == 1)
+                {
+                    //utilizator + parola ok
+                }
+                else
+                {
+                    //parola gresita
+                }
+            }
+            else
+            {
+                //send message user exist already
+            }
         }
         else if (strstr(msg, "seeMore: "))
         {
+            if (isLogged == TRUE)
+            {
+                //ceva
+            }
+            else
+            {
+                // trebuie sa fii logat
+            }
         }
         else if (strstr(msg, "update: ")) //nume utilizator si nume aplciatie
         {
+            if (isLogged == TRUE)
+            {
+                //ceva
+            }
+            else
+            {
+                // trebuie sa fii logat
+            }
             // verifici daca e logat
             // iau nume utilizator => user
             // iau id aplicatie => id
@@ -335,4 +385,73 @@ void writeInFile(char *output_string)
     strcat(output_string, "\n");
     fprintf(file_fd, "%s", output_string);
     fclose(file_fd);
+}
+
+char *getUserName(char *subString)
+{
+    char delim[] = " ";
+    char *ptr_name = strtok(subString, delim);
+    return ptr_name;
+}
+char *getUserPassword(char *subString)
+{
+    char delim[] = " ";
+    char *ptr_name = strtok(subString, delim);
+    ptr_name = strtok(NULL, delim);
+    return ptr_name;
+}
+int checkExistingUserNameOnly(char *nameToFind)
+{
+    FILE *configFd = fopen(config_file, "r");
+
+    char wordAux[100];
+    char nume[50];
+    int count = 0;
+
+    while (1)
+    {
+        if (fscanf(configFd, "%s", wordAux) == EOF)
+            break;
+        else
+        {
+            char *ptr_name = getUserName(wordAux);
+
+            if (strcmp(ptr_name, nameToFind) == 0)
+            {
+                count++;
+                break;
+            }
+        }
+    }
+    fclose(configFd);
+    return count;
+}
+
+bool validPassword(char *givenPass)
+{
+
+    int count_letter = 0, count_LETTER = 0, count_digits = 0, count_length = 0, something_else = 0;
+    count_length = strlen(givenPass);
+    char password[count_length];
+    strcpy(password, givenPass);
+
+    if (count_length < 8)
+        return false;
+
+    for (int i = 0; i < count_length; i++)
+    {
+
+        if (isupper(password[i]))
+            count_LETTER++;
+        else if (islower(password[i]))
+            count_letter++;
+        else if (isdigit(password[i]))
+            count_digits++;
+        else
+            something_else++;
+    }
+    if (count_LETTER > 0 && count_letter > 0 && something_else == 0 && count_digits > 0)
+        return true;
+    else
+        return false;
 }
