@@ -10,12 +10,13 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <list>
 
 #define FALSE 0
 #define TRUE 1
-#define PORT 4444
-#define config_file "config.txt"
-#define apps_file "apps.txt"
+#define PORT 4449
+char config_file[] = "config.txt";
+char apps_file[] = "apps.txt";
 using namespace std;
 int id = 0;
 char userName[50];
@@ -36,22 +37,26 @@ public:
     char *otherDetails;
 
     AppDetails(char *owner);
-    void setFromFile(char *fileName);
+    AppDetails(){};
+    void setFromJsonFile(char *fileName);
     void setField(char field[], char value[]);
+    void setFromCsvLine(char *line);
     char *toString();
 };
 
 void readFromSocket(char *buff, int fd);
 void writeInSocket(char buffer[], int fd);
-void handle_child(int client_fd, char *msg);
+void handler_client(int client_fd, char *msg);
 char *getInputCommand(char *);
 int checkExistingUser(char *);
 char *readFile(char *file);
-void writeInFile(char *output_string);
+void writeInFile(char *output_string, const char *file);
 char *getUserName(char *subString);
 char *getUserPassword(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
+list<AppDetails> getListOfApps();
+
 int main(int argc, char *argv[])
 {
 
@@ -119,16 +124,18 @@ int main(int argc, char *argv[])
         {
             //copil
             close(sd);
-            handle_child(client, msg);
+            handler_client(client, msg);
         }
     }
 }
 
-void handle_child(int client_fd, char *msg)
+void handler_client(int client_fd, char *msg)
 {
     int isLogged = FALSE;
     while (1)
     {
+        bzero(msg, 100);
+        list<AppDetails> listOfApps = getListOfApps();
         readFromSocket(msg, client_fd);
         printf("\nmesaj:%s", msg);
         if (strstr(msg, "quit"))
@@ -138,43 +145,73 @@ void handle_child(int client_fd, char *msg)
             close(client_fd);
             exit(0);
         }
-        else if (strstr(msg, "login : "))
+        else if (strstr(msg, "login:"))
         {
-            //search in a file for username and see the password if is ok ->login else -> wrong
-            strcpy(userName, " "); // e ok?
-
-            char *userAccountDetails = getInputCommand(msg);
-            int found = checkExistingUser(userAccountDetails); //madalina parola
-            if (found != 0)
+            if (isLogged == FALSE)
             {
-                isLogged = TRUE;
-                char *user_ptr = getUserName(userAccountDetails);
-                strcpy(userName, user_ptr);
-                strcpy(msg, "Logged in");
+                //strcpy(userName, " ");
+                printf("Am intrat in isLogged false\n");
+                char *userAccountDetails = getInputCommand(msg); // return username password
+                printf("<%s>\n", userAccountDetails);
+                int found = checkExistingUser(userAccountDetails); // search if username and password exist
+                printf("%d\n", found);
+                if (found != 0) //yes
+                {
+                    printf("S aici\n");
+                    isLogged = TRUE;
+                    char *user_ptr = getUserName(userAccountDetails); // save the username for next requests
+                    strcpy(userName, user_ptr);
+                    strcpy(msg, "Logged in");
+                    writeInSocket(msg, client_fd);
+                }
+                else //no
+                {
+                    strcpy(msg, "User does not exist");
+                    writeInSocket(msg, client_fd);
+                }
+            }
+            else
+            {
+                strcpy(msg, "already logged in");
+                writeInSocket(msg, client_fd);
+            }
+        }
+        else if (strstr(msg, "logout"))
+        {
+            if (isLogged == TRUE)
+            {
+                isLogged == FALSE;
+                strcpy(msg, "Logged out");
                 writeInSocket(msg, client_fd);
             }
             else
             {
-                strcpy(msg, "User does not exist");
+                strcpy(msg, "you are not logged in");
                 writeInSocket(msg, client_fd);
             }
         }
         else if (strstr(msg, "addNewApp: "))
         {
-            // functie isLogged if yes:
-            char *filePath = getInputCommand(msg); // iau path catre fisier sa citesc din el
-            AppDetails app(userName);
-            app.setFromFile(filePath);
-            char *output_string = app.toString();
-            writeInFile(output_string);
+            if (isLogged == TRUE)
+            {
+                char *filePath = getInputCommand(msg);
+                AppDetails app(userName);
+                app.setFromJsonFile(filePath);
+                char *output_string = app.toString();
+                writeInFile(output_string, apps_file);
+            }
+            else
+            {
 
-            //else nu ai voie
+                strcpy(msg, "You must be logged in to add a new app\n");
+                writeInSocket(msg, client_fd);
+            }
         }
-        else if (strstr(msg, "newUser: "))
+        else if (strstr(msg, "newUser:"))
         {
-            char *filePath = getInputCommand(msg);
-            char *new_user_details = readFile(filePath);
-            char *wanted_name = getUserName(new_user_details); //
+
+            char *new_user_details = getInputCommand(msg);
+            char *wanted_name = getUserName(new_user_details);
             int found = checkExistingUserNameOnly(wanted_name);
 
             if (found == 0)
@@ -185,51 +222,58 @@ void handle_child(int client_fd, char *msg)
                 if (check_password == 1)
                 {
                     //utilizator + parola ok
+                    writeInFile(new_user_details, config_file);
+                    strcpy(msg, "user created\n");
+                    writeInSocket(msg, client_fd);
                 }
                 else
                 {
-                    //parola gresita
+                    strcpy(msg, "incorrect password format\n");
+                    writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                //send message user exist already
+                strcpy(msg, "username already exists\n");
+                writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "seeMore: "))
+        else if (strstr(msg, "seeApp: "))
+        {
+            char *id_app = getInputCommand(msg); // id as string
+            int id = atoi(id_app);
+            int found = 0;
+            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+            {
+                if (app->id == id)
+                {
+                    strcpy(msg, app->toString());
+                    found = 1;
+                    break;
+                }
+            }
+            if (found == 0)
+                strcpy(msg, "ivalid id");
+
+            writeInSocket(msg, client_fd);
+        }
+        else if (strstr(msg, "update: "))
         {
             if (isLogged == TRUE)
             {
-                //ceva
+                //if the user is the owner of app , can change details
             }
             else
             {
                 // trebuie sa fii logat
             }
         }
-        else if (strstr(msg, "update: ")) //nume utilizator si nume aplciatie
+        else if (strstr(msg, "feedback: "))
         {
-            if (isLogged == TRUE)
-            {
-                //ceva
-            }
-            else
-            {
-                // trebuie sa fii logat
-            }
-            // verifici daca e logat
-            // iau nume utilizator => user
-            // iau id aplicatie => id
-
-            //verific daca utilizator==owner
-            // gasit = false
-            // for (aplicatie in aplicatii)
-            // if (aplicatie->name == id && aplicatie->owner == owner )
-            // {
-            // update + gasit = true
-            // }
-
-            // daca gasit e false zici ca nu ai gasit, daca nu, zici ca a fost updatat
+        }
+        else if (strstr(msg, "searchApps: "))
+        {
+            //toti
         }
         else
         {
@@ -253,7 +297,7 @@ int checkExistingUser(char *wordToFind)
 
     while (1)
     {
-        if (fscanf(configFd, "%s", wordAux) == EOF)
+        if (fscanf(configFd, "%[^\n]", wordAux) == EOF)
             break;
 
         if (strcmp(wordAux, wordToFind) == 0)
@@ -309,7 +353,7 @@ AppDetails::AppDetails(char *owner)
     id++;
 }
 
-void AppDetails::setFromFile(char *fileName)
+void AppDetails::setFromJsonFile(char *fileName)
 {
     char *contents = readFile(fileName);
     char delim[] = "{},:\" \t\n";
@@ -375,13 +419,13 @@ char *AppDetails::toString()
 {
 
     char *finalString = (char *)malloc(1000); //change it
-    sprintf(finalString, "%d %s %s %s %s %s %s %s %s %s %s", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
+    sprintf(finalString, "%d; %s; %s; %s; %s; %s; %s; %s; %s; %s; %s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
     return finalString;
 }
 
-void writeInFile(char *output_string)
+void writeInFile(char *output_string, const char *file)
 {
-    FILE *file_fd = fopen(apps_file, "a");
+    FILE *file_fd = fopen(file, "a");
     strcat(output_string, "\n");
     fprintf(file_fd, "%s", output_string);
     fclose(file_fd);
@@ -454,4 +498,70 @@ bool validPassword(char *givenPass)
         return true;
     else
         return false;
+}
+
+void AppDetails::setFromCsvLine(char *line)
+{
+
+    char delim_field[] = " ;";
+    char *field = strtok(line, delim_field);
+    this->id = atoi(field);
+
+    field = strtok(NULL, delim_field);
+    this->owner = (char *)malloc(strlen(field) + 1);
+    strcpy(this->owner, field);
+
+    field = strtok(NULL, delim_field);
+    this->name = (char *)malloc(strlen(field) + 1);
+    strcpy(this->name, field);
+
+    field = strtok(NULL, delim_field);
+    this->about = (char *)malloc(strlen(field) + 1);
+    strcpy(this->about, field);
+
+    field = strtok(NULL, delim_field);
+    this->author = (char *)malloc(strlen(field) + 1);
+    strcpy(this->author, field);
+
+    field = strtok(NULL, delim_field);
+    this->websiteLink = (char *)malloc(strlen(field) + 1);
+    strcpy(this->websiteLink, field);
+
+    field = strtok(NULL, delim_field);
+    this->systemRequirements = (char *)malloc(strlen(field) + 1);
+    strcpy(this->systemRequirements, field);
+
+    field = strtok(NULL, delim_field);
+    this->price = (char *)malloc(strlen(field) + 1);
+    strcpy(this->price, field);
+
+    field = strtok(NULL, delim_field);
+    this->ramMemory = (char *)malloc(strlen(field) + 1);
+    strcpy(this->ramMemory, field);
+
+    field = strtok(NULL, delim_field);
+    this->version = (char *)malloc(strlen(field) + 1);
+    strcpy(this->version, field);
+
+    field = strtok(NULL, delim_field);
+    this->otherDetails = (char *)malloc(strlen(field) + 1);
+    strcpy(this->otherDetails, field);
+}
+
+list<AppDetails> getListOfApps()
+{
+    char *contents = readFile(apps_file); // all content
+    list<AppDetails> listOfApps;
+    char delim_apps[] = "\n\r";
+    char *appDetails = strtok_r(contents, delim_apps, &contents);
+    while (appDetails != nullptr)
+    {
+        AppDetails app;
+
+        app.setFromCsvLine(appDetails);
+        listOfApps.push_back(app);
+        appDetails = strtok_r(NULL, delim_apps, &contents);
+    }
+
+    return listOfApps;
 }

@@ -17,11 +17,11 @@
 #define apps_file "apps.txt"
 using namespace std;
 
-void writeInFile(char *output_string)
+void writeInFile(char *output_string, const char *file)
 {
-    FILE *file_fd = fopen(apps_file, "a");
+    FILE *file_fd = fopen(file, "a");
     strcat(output_string, "\n");
-    fprintf(file_fd, output_string);
+    fprintf(file_fd, "%s", output_string);
     fclose(file_fd);
 }
 
@@ -29,5 +29,5 @@ int main()
 {
     char strring[] = "asdsad";
     char *ptr = strring;
-    writeInFile(ptr);
+    writeInFile(ptr, apps_file);
 }
