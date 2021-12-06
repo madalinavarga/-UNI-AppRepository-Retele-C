@@ -51,7 +51,7 @@ char *getInputCommand(char *);
 int checkExistingUser(char *);
 char *readFile(char *file);
 void writeInFile(char *output_string, const char *file);
-char *getUserName(char *subString);
+char *getUserName(char *givenString);
 char *getUserPassword(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
@@ -149,15 +149,14 @@ void handler_client(int client_fd, char *msg)
         {
             if (isLogged == FALSE)
             {
-                //strcpy(userName, " ");
-                printf("Am intrat in isLogged false\n");
+                strcpy(userName, " ");
                 char *userAccountDetails = getInputCommand(msg); // return username password
-                printf("<%s>\n", userAccountDetails);
+
                 int found = checkExistingUser(userAccountDetails); // search if username and password exist
                 printf("%d\n", found);
                 if (found != 0) //yes
                 {
-                    printf("S aici\n");
+
                     isLogged = TRUE;
                     char *user_ptr = getUserName(userAccountDetails); // save the username for next requests
                     strcpy(userName, user_ptr);
@@ -190,7 +189,7 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "addNewApp: "))
+        else if (strstr(msg, "addNewApp:"))
         {
             if (isLogged == TRUE)
             {
@@ -210,14 +209,22 @@ void handler_client(int client_fd, char *msg)
         else if (strstr(msg, "newUser:"))
         {
 
-            char *new_user_details = getInputCommand(msg);
-            char *wanted_name = getUserName(new_user_details);
+            char *new_user_details = getInputCommand(msg); // return username password
+            printf("<%s> - user datails\n", new_user_details);
+
+            char *wanted_name = getUserName(new_user_details); //de modificat somthing wrong
+            //printf("<%s> name\n", wanted_name);
+            printf("\nDupa ce pun in username\n\n");
+
             int found = checkExistingUserNameOnly(wanted_name);
+            printf("found: %d\n", found);
 
             if (found == 0)
             {
                 // numele nu exista, poti face contul daca parola e ok
+
                 char *password = getUserPassword(new_user_details);
+                printf("%s pass is \n", password);
                 int check_password = validPassword(password);
                 if (check_password == 1)
                 {
@@ -238,7 +245,7 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "seeApp: "))
+        else if (strstr(msg, "seeApp:"))
         {
             char *id_app = getInputCommand(msg); // id as string
             int id = atoi(id_app);
@@ -257,27 +264,26 @@ void handler_client(int client_fd, char *msg)
 
             writeInSocket(msg, client_fd);
         }
-        else if (strstr(msg, "update: "))
+        else if (strstr(msg, "update:"))
         {
             if (isLogged == TRUE)
             {
-                //if the user is the owner of app , can change details
+                //
             }
             else
             {
                 // trebuie sa fii logat
             }
         }
-        else if (strstr(msg, "feedback: "))
-        {
-        }
-        else if (strstr(msg, "searchApps: "))
+
+        else if (strstr(msg, "searchApps:"))
         {
             //toti
         }
         else
         {
-            //default
+            strcpy(msg, "command doesn't exist!");
+            writeInSocket(msg, client_fd);
         }
     }
 }
@@ -426,23 +432,31 @@ char *AppDetails::toString()
 void writeInFile(char *output_string, const char *file)
 {
     FILE *file_fd = fopen(file, "a");
-    strcat(output_string, "\n");
-    fprintf(file_fd, "%s", output_string);
+    // strcat(output_string, "\n");
+    fprintf(file_fd, "\n%s", output_string);
     fclose(file_fd);
 }
 
-char *getUserName(char *subString)
+char *getUserName(char *givenString) //somthing wrong
 {
+    int len = strlen(givenString) + 1;
+    char copy_subString[len];
+    strcpy(copy_subString, givenString);
+    printf("Ce pun in userName:<%s>\n", copy_subString);
     char delim[] = " ";
-    char *ptr_name = strtok(subString, delim);
+    char *ptr_name = strtok(copy_subString, delim);
+    printf("returnez ptr usernname <%s>", ptr_name);
+
     return ptr_name;
 }
-char *getUserPassword(char *subString)
+char *getUserPassword(char *inputString)
 {
-    char delim[] = " ";
-    char *ptr_name = strtok(subString, delim);
-    ptr_name = strtok(NULL, delim);
-    return ptr_name;
+    printf("Intru in getUser\n");
+    char *subString;
+    subString = strrchr(inputString, ' ') + 1;
+    printf("Parolaa:<%s>\n", subString);
+    // subString[strlen(subString) - 1] = '\0';
+    return subString;
 }
 int checkExistingUserNameOnly(char *nameToFind)
 {

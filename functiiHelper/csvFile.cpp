@@ -81,7 +81,6 @@ void AppDetails::setFromCsvLine(char *line)
     field = strtok(NULL, delim_field);
     this->about = (char *)malloc(strlen(field) + 1);
     strcpy(this->about, field);
-
     field = strtok(NULL, delim_field);
     this->author = (char *)malloc(strlen(field) + 1);
     strcpy(this->author, field);
