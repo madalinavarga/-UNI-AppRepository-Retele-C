@@ -14,7 +14,7 @@
 
 #define FALSE 0
 #define TRUE 1
-#define PORT 4449
+#define PORT 4447
 char config_file[] = "config.txt";
 char apps_file[] = "apps.txt";
 using namespace std;
@@ -51,8 +51,8 @@ char *getInputCommand(char *);
 int checkExistingUser(char *);
 char *readFile(char *file);
 void writeInFile(char *output_string, const char *file);
-char *getUserName(char *givenString);
-char *getUserPassword(char *subString);
+char *getFirstParameter(char *givenString);
+char *getSecondParameter(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
 list<AppDetails> getListOfApps();
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     {
 
         int client;
-        socklen_t length; //am modificat
+        socklen_t length;
         length = sizeof(clientStruct);
 
         printf("[server]Asteptam la portul %d...\n", PORT);
@@ -158,7 +158,7 @@ void handler_client(int client_fd, char *msg)
                 {
 
                     isLogged = TRUE;
-                    char *user_ptr = getUserName(userAccountDetails); // save the username for next requests
+                    char *user_ptr = getFirstParameter(userAccountDetails); // save the username for next requests
                     strcpy(userName, user_ptr);
                     strcpy(msg, "Logged in");
                     writeInSocket(msg, client_fd);
@@ -179,7 +179,7 @@ void handler_client(int client_fd, char *msg)
         {
             if (isLogged == TRUE)
             {
-                isLogged == FALSE;
+                isLogged = FALSE;
                 strcpy(msg, "Logged out");
                 writeInSocket(msg, client_fd);
             }
@@ -193,11 +193,14 @@ void handler_client(int client_fd, char *msg)
         {
             if (isLogged == TRUE)
             {
-                char *filePath = getInputCommand(msg);
+                char *fileName = getInputCommand(msg);
                 AppDetails app(userName);
-                app.setFromJsonFile(filePath);
+                app.setFromJsonFile(fileName);
                 char *output_string = app.toString();
+                printf("doamne ajuta : \n %s", output_string); // why???
                 writeInFile(output_string, apps_file);
+                strcpy(msg, "App loaded");
+                writeInSocket(msg, client_fd);
             }
             else
             {
@@ -212,7 +215,7 @@ void handler_client(int client_fd, char *msg)
             char *new_user_details = getInputCommand(msg); // return username password
             printf("<%s> - user datails\n", new_user_details);
 
-            char *wanted_name = getUserName(new_user_details); //de modificat somthing wrong
+            char *wanted_name = getFirstParameter(new_user_details); //de modificat somthing wrong
             //printf("<%s> name\n", wanted_name);
             printf("\nDupa ce pun in username\n\n");
 
@@ -223,7 +226,7 @@ void handler_client(int client_fd, char *msg)
             {
                 // numele nu exista, poti face contul daca parola e ok
 
-                char *password = getUserPassword(new_user_details);
+                char *password = getSecondParameter(new_user_details);
                 printf("%s pass is \n", password);
                 int check_password = validPassword(password);
                 if (check_password == 1)
@@ -247,7 +250,7 @@ void handler_client(int client_fd, char *msg)
         }
         else if (strstr(msg, "seeApp:"))
         {
-            char *id_app = getInputCommand(msg); // id as string
+            char *id_app = getInputCommand(msg);
             int id = atoi(id_app);
             int found = 0;
             for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
@@ -268,17 +271,41 @@ void handler_client(int client_fd, char *msg)
         {
             if (isLogged == TRUE)
             {
-                //
+                char *parameters = getInputCommand(msg);
+                char *id_app = getFirstParameter(parameters);
+                char *fileDetails = getSecondParameter(parameters);
+                int id = atoi(id_app);
+                int found = 0;
+                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+                {
+                    if (app->id == id)
+                    {
+                        if (strcmp(app->owner, userName) == 0)
+                        {
+                            //in progress...
+                            found++;
+                            strcpy(msg, "app updated");
+                        }
+                        else
+                            strcpy(msg, "Only the owner has the authorization to make any change");
+                    }
+                }
+
+                if (found == 0)
+                    strcpy(msg, "ivalid id");
+
+                writeInSocket(msg, client_fd);
             }
             else
             {
-                // trebuie sa fii logat
+                strcpy(msg, "you must to be logged in");
+                writeInSocket(msg, client_fd);
             }
         }
 
         else if (strstr(msg, "searchApps:"))
         {
-            //toti
+            //in progress...
         }
         else
         {
@@ -287,15 +314,15 @@ void handler_client(int client_fd, char *msg)
         }
     }
 }
-char *getInputCommand(char *inputString) //login: madalina parola
+char *getInputCommand(char *inputString)
 {
     char *subString;
     subString = strrchr(inputString, ':') + 1;
     subString[strlen(subString) - 1] = '\0';
-    return subString; // return madalina parola
+    return subString;
 }
 
-int checkExistingUser(char *wordToFind)
+int checkExistingUser(char *wordToFind) //not working
 {
     FILE *configFd = fopen(config_file, "r");
     char wordAux[100];
@@ -437,25 +464,25 @@ void writeInFile(char *output_string, const char *file)
     fclose(file_fd);
 }
 
-char *getUserName(char *givenString) //somthing wrong
+char *getFirstParameter(char *givenString)
 {
-    int len = strlen(givenString) + 1;
+
+    int len = strlen(givenString);
     char copy_subString[len];
+
     strcpy(copy_subString, givenString);
-    printf("Ce pun in userName:<%s>\n", copy_subString);
     char delim[] = " ";
     char *ptr_name = strtok(copy_subString, delim);
-    printf("returnez ptr usernname <%s>", ptr_name);
+    char *copy_pointer = (char *)malloc(strlen(ptr_name));
+    strcpy(copy_pointer, ptr_name);
 
-    return ptr_name;
+    return copy_pointer;
 }
-char *getUserPassword(char *inputString)
+char *getSecondParameter(char *inputString)
 {
     printf("Intru in getUser\n");
     char *subString;
     subString = strrchr(inputString, ' ') + 1;
-    printf("Parolaa:<%s>\n", subString);
-    // subString[strlen(subString) - 1] = '\0';
     return subString;
 }
 int checkExistingUserNameOnly(char *nameToFind)
@@ -472,7 +499,7 @@ int checkExistingUserNameOnly(char *nameToFind)
             break;
         else
         {
-            char *ptr_name = getUserName(wordAux);
+            char *ptr_name = getFirstParameter(wordAux);
 
             if (strcmp(ptr_name, nameToFind) == 0)
             {
