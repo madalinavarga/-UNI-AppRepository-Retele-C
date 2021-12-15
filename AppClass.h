@@ -82,6 +82,11 @@ void AppDetails::setField(char field[], char value[])
         this->name = (char *)malloc(strlen(value) + 1);
         strcpy(this->name, value);
     }
+    else if (strcmp(field, "author") == 0)
+    {
+        this->author = (char *)malloc(strlen(value) + 1);
+        strcpy(this->author, value);
+    }
     else if (strcmp(field, "about") == 0)
     {
         this->about = (char *)malloc(strlen(value) + 1);

@@ -1,3 +1,5 @@
 1235; Madalina; 23; mada; lara; 123; Madalina; 23; mada; lara; 123;
 123; Madalina; 23; mada; lara; 123; Madalina; 23; mada; lara; 123;
-1; madalina; aplicatie1; inovatie; AmReusit; www.home.ro; linux; free; 1.2GB; 20.2; AICI;
+4; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; AICI; AICI; 20.2; (null);
+1; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; free; 1; 20.2; (null);
+6; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; free; 1.2GB; 20.2; (null);

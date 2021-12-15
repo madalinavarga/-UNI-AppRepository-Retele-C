@@ -28,11 +28,37 @@ public:
 
     AppDetails(char *owner);
     AppDetails(){};
+    AppDetails &operator=(const AppDetails &);
     void setFromJsonFile(char *fileName);
     void setField(char field[], char value[]);
     void setFromCsvLine(char *line);
     char *toString();
 };
+AppDetails &AppDetails::operator=(const AppDetails &old_obj)
+{
+    id = old_obj.id;
+    owner = (char *)malloc(strlen(old_obj.owner) + 1);
+    strcpy(owner, old_obj.owner);
+    name = (char *)malloc(strlen(old_obj.name) + 1);
+    strcpy(name, old_obj.name);
+    about = (char *)malloc(strlen(old_obj.about) + 1);
+    strcpy(about, old_obj.about);
+    author = (char *)malloc(strlen(old_obj.author) + 1);
+    strcpy(author, old_obj.author);
+    websiteLink = (char *)malloc(strlen(old_obj.websiteLink) + 1);
+    strcpy(websiteLink, old_obj.websiteLink);
+    systemRequirements = (char *)malloc(strlen(old_obj.systemRequirements) + 1);
+    strcpy(systemRequirements, old_obj.systemRequirements);
+    price = (char *)malloc(strlen(old_obj.price) + 1);
+    strcpy(price, old_obj.price);
+    ramMemory = (char *)malloc(strlen(old_obj.ramMemory) + 1);
+    strcpy(ramMemory, old_obj.ramMemory);
+    version = (char *)malloc(strlen(old_obj.version) + 1);
+    strcpy(version, old_obj.version);
+    otherDetails = (char *)malloc(strlen(old_obj.otherDetails) + 1);
+    strcpy(otherDetails, old_obj.otherDetails);
+    return *this;
+}
 
 char *AppDetails::toString()
 {

@@ -1,10 +1,9 @@
 
 #include "AppClass.h"
-#define FALSE 0
-#define TRUE 1
-#define PORT 4447
+
 char config_file[] = "config.txt";
 char apps_file[] = "apps.txt";
+char fisierUpdate[] = "test.json";
 using namespace std;
 int id = 0;
 char userName[50];
@@ -21,6 +20,7 @@ char *getSecondParameter(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
 list<AppDetails> getListOfApps();
+bool isValidField(char *field, char *value, AppDetails app);
 
 int main(int argc, char *argv[])
 {
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         printf("[server]Asteptam la portul %d...\n", PORT);
         fflush(stdout);
 
-        client = accept(sd, (struct sockaddr *)&clientStruct, &length); // returneaza fd pt comunicare cu client
+        client = accept(sd, (struct sockaddr *)&clientStruct, &length);
         if (client < 0)
         {
             perror("[server]Eroare la accept().\n");
@@ -79,15 +79,15 @@ int main(int argc, char *argv[])
         }
         else if (pid_general > 0)
         {
-            //parinte
-            close(client); // il are fiul
+            //parent
+            close(client);
             while (waitpid(-1, NULL, WNOHANG))
                 ;
             continue;
         }
         else if (pid_general == 0)
         {
-            //copil
+            //son
             close(sd);
             handler_client(client, msg);
         }
@@ -246,7 +246,25 @@ void handler_client(int client_fd, char *msg)
                     {
                         if (strcmp(app->owner, userName) == 0)
                         {
-                            //in progress...
+
+                            FILE *file_fd = fopen(apps_file, "w+");
+                            fseek(file_fd, 0, SEEK_SET);
+
+                            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+                            {
+                                if (app->id == id)
+                                {
+
+                                    app->setFromJsonFile(fisierUpdate);
+
+                                    for (auto i = listOfApps.begin(); i != listOfApps.end(); i++)
+                                    {
+                                        char *output_string = i->toString();
+                                        fprintf(file_fd, "%s\n", output_string);
+                                    }
+                                }
+                            }
+                            fclose(file_fd);
                             found++;
                             strcpy(msg, "app updated");
                         }
@@ -269,176 +287,286 @@ void handler_client(int client_fd, char *msg)
 
         else if (strstr(msg, "searchApps:"))
         {
-            //in progress...
+            char returnedString[100] = "";
+            printf("Intru in search apps\n");
+            printf("Mesajul: %s\n", msg);
+            char *nameOfFile = getInputCommand(msg);
+            printf("Filename: <%s>\n", nameOfFile);
+            char delim[] = "{},:\" \t\n";
+            bool valid = true;
+
+            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+            {
+                char *filtersDetails = readFile(nameOfFile); // filters
+                printf("%s\n", filtersDetails);
+                char *field = strtok(filtersDetails, delim);
+                char *value = strtok(NULL, delim);
+
+                while (field)
+                {
+                    valid = isValidField(field, value, *app); // return if the current filed and value is the wanted one
+                    printf("%d\n", valid);
+
+                    if (valid == false)
+                    {
+
+                        break;
+                    }
+                    field = strtok(NULL, delim);
+                    value = strtok(NULL, delim);
+                }
+                if (valid == true)
+                {
+                    char *output_string = app->toString();
+
+                    strcat(returnedString, output_string);
+                    strcat(returnedString, "\n");
+                }
+            }
+
+            writeInSocket(returnedString, client_fd); //mm ?
         }
-        else
+        else if (strstr(msg, "deleteApp:"))
         {
-            strcpy(msg, "command doesn't exist!");
+            if (isLogged == TRUE)
+            {
+                char *parameter = getInputCommand(msg);
+                int id = atoi(parameter);
+                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+                {
+                    if (app->id == id)
+                    {
+                        if (strcmp(app->owner, userName) == 0)
+                        {
+                        }
+                    }
+                }
+                else
+                {
+                    strcpy(msg, "Only the owner has the authorization to make any change");
+                }
+            }
+            else
+            {
+                strcpy(msg, "command doesn't exist!");
+            }
             writeInSocket(msg, client_fd);
         }
     }
-}
-char *getInputCommand(char *inputString) //command:parameters*
-{
-    char *subString;
-    subString = strrchr(inputString, ':') + 1;
-    subString[strlen(subString) - 1] = '\0';
-    return subString;
-}
-
-int checkExistingUser(char *wordToFind) //not working
-{
-    FILE *configFd = fopen(config_file, "r"); //open the file with users
-    char wordAux[100];
-    int count = 0;
-
-    while (1)
+    char *getInputCommand(char *inputString) //command:parameters*
     {
-        if (fscanf(configFd, "%[^\n]", wordAux) == EOF) // untill end of file check if the user exist
-            break;
+        printf("sunt in get\n");
+        char *subString;
+        subString = strrchr(inputString, ':') + 1;
+        subString[strlen(subString) - 1] = '\0';
+        printf("Ce returnez <%s>\n", subString);
+        return subString;
+    }
 
-        if (strcmp(wordAux, wordToFind) == 0)
+    int checkExistingUser(char *wordToFind) //not working
+    {
+        FILE *configFd = fopen(config_file, "r"); //open the file with users
+        char wordAux[100];
+        int count = 0;
+
+        while (1)
         {
-            count++;
-            break;
-        }
-    }
-    fclose(configFd);
-    return count;
-}
-void readFromSocket(char *buff, int fd)
-{
-    bzero(buff, 100);
-    if (read(fd, buff, 100) < 0)
-    {
-        perror("[client]Eroare la read() de la server.\n");
-        //return errno;
-    }
-}
+            if (fscanf(configFd, "%[^\n]", wordAux) == EOF) // untill end of file check if the user exist
+                break;
 
-void writeInSocket(char buffer[], int fd)
-{
-
-    if (write(fd, buffer, 100) <= 0)
-    {
-        perror("[client]Eroare la write() spre server.\n");
-        //return errno;
-    }
-}
-char *readFile(char *file)
-{
-    FILE *file_fd = fopen(file, "r"); //open file in read mode
-
-    fseek(file_fd, 0, SEEK_END);     //change the position at the end of the file
-    long file_size = ftell(file_fd); //take the position
-    fseek(file_fd, 0, SEEK_SET);     //go back at the beginning of the file
-
-    char *fileContent = (char *)malloc(file_size + 1);
-    fread(fileContent, 1, file_size, file_fd); //read the content
-    fclose(file_fd);
-
-    fileContent[file_size] = 0;
-
-    return fileContent;
-}
-
-void writeInFile(char *output_string, const char *file)
-{
-    FILE *file_fd = fopen(file, "a"); // append mode
-    fprintf(file_fd, "%s\n", output_string);
-    fclose(file_fd);
-}
-
-char *getFirstParameter(char *givenString)
-{
-
-    int len = strlen(givenString);
-    char copy_subString[len];
-
-    strcpy(copy_subString, givenString);
-    char delim[] = " ";
-    char *ptr_name = strtok(copy_subString, delim);
-    char *copy_pointer = (char *)malloc(strlen(ptr_name));
-    strcpy(copy_pointer, ptr_name);
-
-    return copy_pointer;
-}
-char *getSecondParameter(char *inputString)
-{
-    char *subString;
-    subString = strrchr(inputString, ' ') + 1;
-    return subString;
-}
-int checkExistingUserNameOnly(char *nameToFind)
-{
-    FILE *configFd = fopen(config_file, "r");
-
-    char wordAux[100];
-    char nume[50];
-    int count = 0;
-
-    while (1)
-    {
-        if (fscanf(configFd, "%s", wordAux) == EOF)
-            break;
-        else
-        {
-            char *ptr_name = getFirstParameter(wordAux);
-
-            if (strcmp(ptr_name, nameToFind) == 0)
+            if (strcmp(wordAux, wordToFind) == 0)
             {
                 count++;
                 break;
             }
         }
+        fclose(configFd);
+        return count;
     }
-    fclose(configFd);
-    return count;
-}
+    void readFromSocket(char *buff, int fd)
+    {
+        bzero(buff, 100);
+        if (read(fd, buff, 100) < 0)
+        {
+            perror("[client]Eroare la read() de la server.\n");
+            //return errno;
+        }
+    }
 
-bool validPassword(char *givenPass) // must be >8 characters + 1+ numbers 1+uppercase 1+lowercase
-{
-
-    int count_letter = 0, count_LETTER = 0, count_digits = 0, count_length = 0, something_else = 0;
-    count_length = strlen(givenPass);
-    char password[count_length];
-    strcpy(password, givenPass);
-
-    if (count_length < 8) //check length
-        return false;
-
-    for (int i = 0; i < count_length; i++) //check the content
+    void writeInSocket(char buffer[], int fd)
     {
 
-        if (isupper(password[i]))
-            count_LETTER++;
-        else if (islower(password[i]))
-            count_letter++;
-        else if (isdigit(password[i]))
-            count_digits++;
+        if (write(fd, buffer, 100) <= 0)
+        {
+            perror("[client]Eroare la write() spre server.\n");
+            //return errno;
+        }
+    }
+    char *readFile(char *file)
+    {
+        FILE *file_fd = fopen(file, "r"); //open file in read mode
+
+        fseek(file_fd, 0, SEEK_END);     //change the position at the end of the file
+        long file_size = ftell(file_fd); //take the position
+        fseek(file_fd, 0, SEEK_SET);     //go back at the beginning of the file
+
+        char *fileContent = (char *)malloc(file_size + 1);
+        fread(fileContent, 1, file_size, file_fd); //read the content
+        fclose(file_fd);
+
+        fileContent[file_size] = 0;
+
+        return fileContent;
+    }
+
+    void writeInFile(char *output_string, const char *file)
+    {
+        FILE *file_fd = fopen(file, "a"); // append mode
+        fprintf(file_fd, "%s\n", output_string);
+        fclose(file_fd);
+    }
+
+    char *getFirstParameter(char *givenString)
+    {
+
+        int len = strlen(givenString);
+        char copy_subString[len];
+
+        strcpy(copy_subString, givenString);
+        char delim[] = " ";
+        char *ptr_name = strtok(copy_subString, delim);
+        char *copy_pointer = (char *)malloc(strlen(ptr_name));
+        strcpy(copy_pointer, ptr_name);
+
+        return copy_pointer;
+    }
+    char *getSecondParameter(char *inputString)
+    {
+        char *subString;
+        subString = strrchr(inputString, ' ') + 1;
+        return subString;
+    }
+    int checkExistingUserNameOnly(char *nameToFind)
+    {
+        FILE *configFd = fopen(config_file, "r");
+
+        char wordAux[100];
+        char nume[50];
+        int count = 0;
+
+        while (1)
+        {
+            if (fscanf(configFd, "%s", wordAux) == EOF)
+                break;
+            else
+            {
+                char *ptr_name = getFirstParameter(wordAux);
+
+                if (strcmp(ptr_name, nameToFind) == 0)
+                {
+                    count++;
+                    break;
+                }
+            }
+        }
+        fclose(configFd);
+        return count;
+    }
+
+    bool validPassword(char *givenPass) // must be >8 characters + 1+ numbers 1+uppercase 1+lowercase
+    {
+
+        int count_letter = 0, count_LETTER = 0, count_digits = 0, count_length = 0, something_else = 0;
+        count_length = strlen(givenPass);
+        char password[count_length];
+        strcpy(password, givenPass);
+
+        if (count_length < 8) //check length
+            return false;
+
+        for (int i = 0; i < count_length; i++) //check the content
+        {
+
+            if (isupper(password[i]))
+                count_LETTER++;
+            else if (islower(password[i]))
+                count_letter++;
+            else if (isdigit(password[i]))
+                count_digits++;
+            else
+                something_else++;
+        }
+        if (count_LETTER > 0 && count_letter > 0 && something_else == 0 && count_digits > 0)
+            return true;
         else
-            something_else++;
+            return false;
     }
-    if (count_LETTER > 0 && count_letter > 0 && something_else == 0 && count_digits > 0)
-        return true;
-    else
-        return false;
-}
 
-list<AppDetails> getListOfApps()
-{
-    char *contents = readFile(apps_file); // read the file with apps
-    list<AppDetails> listOfApps;          //create a list
-    char delim_apps[] = "\n\r";
-    char *appDetails = strtok_r(contents, delim_apps, &contents);
-    while (appDetails != nullptr) // for each app create an object and add it to the list
+    list<AppDetails> getListOfApps()
     {
-        AppDetails app;
+        char *contents = readFile(apps_file); // read the file with apps
+        list<AppDetails> listOfApps;          //create a list
+        char delim_apps[] = "\n\r";
+        char *appDetails = strtok_r(contents, delim_apps, &contents);
+        while (appDetails != nullptr) // for each app create an object and add it to the list
+        {
+            AppDetails app;
 
-        app.setFromCsvLine(appDetails);
-        listOfApps.push_back(app);
-        appDetails = strtok_r(NULL, delim_apps, &contents);
+            app.setFromCsvLine(appDetails);
+            listOfApps.push_back(app);
+            appDetails = strtok_r(NULL, delim_apps, &contents);
+        }
+
+        return listOfApps;
     }
 
-    return listOfApps;
-}
+    bool isValidField(char *field, char *value, AppDetails app)
+    {
+
+        if (strcmp(field, "name") == 0)
+        {
+            if (strstr(app.name, value))
+                return true;
+            else
+                return false;
+        }
+        if (strcmp(field, "systemRequirements") == 0)
+        {
+            if (strstr(app.systemRequirements, value))
+                return true;
+            else
+                return false;
+        }
+        if (strcmp(field, "price") == 0)
+        {
+            if (strstr(app.price, value))
+                return true;
+            else
+                return false;
+        }
+        if (strcmp(field, "ramMemory") == 0)
+        {
+
+            if (strstr(app.ramMemory, value))
+
+                return true;
+            else
+                return false;
+        }
+        if (strcmp(field, "version") == 0)
+        {
+            if (strstr(app.version, value))
+                return true;
+            else
+                return false;
+        }
+        if (strcmp(field, "author") == 0)
+        {
+            if (strstr(app.author, value))
+                return true;
+            else
+                return false;
+        }
+
+        return false;
+    }

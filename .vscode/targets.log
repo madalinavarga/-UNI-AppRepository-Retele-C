@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Dec 10 07:39:45 2021
+# Make data base, printed on Tue Dec 14 14:06:41 2021
 
 # Variables
 
@@ -105,7 +105,7 @@ XDG_SESSION_DESKTOP = mate
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2003
+GIO_LAUNCHED_DESKTOP_FILE_PID = 13567
 # automatic
 %F = $(notdir $%)
 # environment
@@ -123,7 +123,7 @@ QT_QPA_PLATFORMTHEME = qt5ct
 # environment
 XDG_SEAT = seat0
 # environment
-SSH_AGENT_PID = 1171
+SSH_AGENT_PID = 1170
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = MATE
 # environment
@@ -163,7 +163,7 @@ QT_IM_MODULE = ibus
 # environment
 SHLVL = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-d2dfe2e6-5cb2-4f73-8434-13a416d1c66c.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-c56d6256-920a-4665-b98f-eeee36e47c19.sock
 # environment
 COMPIZ_CONFIG_PROFILE = mint
 # environment
@@ -245,7 +245,7 @@ LC_ADDRESS = ro_RO.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 2003
+VSCODE_PID = 13567
 # variable set hash-table stats:
 # Load=118/1024=12%, Rehash=0, Collisions=11/146=8%
 
@@ -255,9 +255,9 @@ VSCODE_PID = 2003
 
 # Directories
 
-# . (device 2054, inode 3295955): 22 files, no impossibilities.
+# . (device 2054, inode 3295955): 24 files, no impossibilities.
 
-# 22 files, no impossibilities in 1 directories.
+# 24 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -277,6 +277,7 @@ all:
 # automatic
 # % := 
 # automatic
+ 
 # * := 
 # automatic
 # + := 
@@ -287,7 +288,6 @@ all:
 # automatic
 # ^ := 
 # automatic
- 
 # ? := 
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
@@ -329,12 +329,12 @@ clean:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 28 / storage = 281 B / avg = 10 B
-# current buf: size = 8162 B / used = 281 B / count = 28 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 30 / storage = 304 B / avg = 10 B
+# current buf: size = 8162 B / used = 304 B / count = 30 / avg = 10 B
 
-# strcache performance: lookups = 36 / hit rate = 22%
+# strcache performance: lookups = 38 / hit rate = 21%
 # hash-table stats:
-# Load=28/8192=0%, Rehash=0, Collisions=1/36=3%
-# Finished Make data base on Fri Dec 10 07:39:45 2021
+# Load=30/8192=0%, Rehash=0, Collisions=1/38=3%
+# Finished Make data base on Tue Dec 14 14:06:41 2021
 
  
