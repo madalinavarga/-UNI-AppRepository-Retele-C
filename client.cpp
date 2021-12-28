@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     int socket_descriptor;
     struct sockaddr_in server;
-    char msg[100];
+    char msg[1000];
     int number;
 
     if (argc != 3)
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         bzero(msg, 100);
-        printf("[client]Introduceti un nume: ");
+        printf("[client]Introduceti comanda: ");
         fflush(stdout);
         read(0, msg, 100); //change
         writeInSocket(msg, socket_descriptor);

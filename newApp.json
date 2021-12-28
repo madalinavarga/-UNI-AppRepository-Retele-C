@@ -1,0 +1,11 @@
+{
+    "name": "A",
+    "about": "lallala",
+    "author": "author1",
+    "websiteLink": "www.home.ro",
+    "systemRequirements": "windows",
+    "price": "paid",
+    "ramMemory": "1.2GB",
+    "version": "20.2",
+    "otherDetails": "special"
+}

@@ -65,13 +65,15 @@ void AppDetails::setFromJsonFile(char *fileName)
         setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
         field = strtok(NULL, delim);
         value = strtok(NULL, delim);
+        printf("\n %s %s ", field, value);
     }
 }
 
 void AppDetails::setField(char field[], char value[])
 {
 
-    char *otherDetails;
+    int i = 0;
+    printf("Intru aici de %d ori\n", i++);
     if (strcmp(field, "owner") == 0)
     {
         this->owner = (char *)malloc(strlen(value) + 1);
@@ -116,6 +118,13 @@ void AppDetails::setField(char field[], char value[])
     {
         this->version = (char *)malloc(strlen(value) + 1);
         strcpy(this->version, value);
+        printf("intru in setare\n");
+    }
+    else if (strcmp(field, "otherDetails") == 0)
+    {
+        this->otherDetails = (char *)malloc(strlen(value) + 1);
+        strcpy(this->otherDetails, value);
+        printf("intru in setare\n");
     }
     // else return false
 }

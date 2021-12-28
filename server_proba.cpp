@@ -1,13 +1,49 @@
 
-#include "AppClass.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <list>
+#define FALSE 0
+#define TRUE 1
+#define PORT 4447
 
 char config_file[] = "config.txt";
 char apps_file[] = "apps.txt";
-char fisierUpdate[] = "test.json";
 using namespace std;
 int id = 0;
 char userName[50];
+class AppDetails
+{
+public:
+    int id = 0;
+    char *owner;
+    char *name;
+    char *about;
+    char *author;
+    char *websiteLink;
+    char *systemRequirements;
+    char *price;
+    char *ramMemory;
+    char *version;
+    char *otherDetails;
 
+    AppDetails(char *owner);
+    AppDetails(){};
+    void setFromJsonFile(char *fileName);
+    void setField(char field[], char value[]);
+    void setFromCsvLine(char *line);
+    char *toString();
+};
+
+list<AppDetails> getListOfApps();
 void readFromSocket(char *buff, int fd);
 void writeInSocket(char buffer[], int fd);
 void handler_client(int client_fd, char *msg);
@@ -19,7 +55,7 @@ char *getFirstParameter(char *givenString);
 char *getSecondParameter(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
-list<AppDetails> getListOfApps();
+
 bool isValidField(char *field, char *value, AppDetails app);
 
 int main(int argc, char *argv[])
@@ -28,7 +64,11 @@ int main(int argc, char *argv[])
     struct sockaddr_in server;
     struct sockaddr_in clientStruct;
     int sd;
-    char msg[100];
+    char msg[1000];
+
+    //reuse
+    int on = 1;
+    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
     if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
@@ -243,8 +283,8 @@ void handler_client(int client_fd, char *msg)
                 char *parameters = getInputCommand(msg);
                 char *id_app = getFirstParameter(parameters);
                 printf("parametru 1 <%s>\n", id_app);
-                char *fileDetails = getSecondParameter(parameters);
-                printf("parametru 2 <%s>\n", fileDetails);
+                char *fileUpdate = getSecondParameter(parameters);
+                printf("parametru 2 <%s>\n", fileUpdate);
                 int id = atoi(id_app);
                 int found = 0;
                 for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
@@ -262,7 +302,7 @@ void handler_client(int client_fd, char *msg)
                                 if (app->id == id)
                                 {
 
-                                    app->setFromJsonFile(fisierUpdate);
+                                    app->setFromJsonFile(fileUpdate);
 
                                     for (auto i = listOfApps.begin(); i != listOfApps.end(); i++)
                                     {
@@ -292,31 +332,27 @@ void handler_client(int client_fd, char *msg)
             }
         }
 
-        else if (strstr(msg, "searchApps:"))
+        else if (strstr(msg, "searchApps:")) //filename
         {
             char returnedString[100] = "";
             printf("Intru in search apps\n");
             printf("Mesajul: %s\n", msg);
             char *nameOfFile = getInputCommand(msg);
-            printf("Filename: <%s>\n", nameOfFile);
             char delim[] = "{},:\" \t\n";
             bool valid = true;
 
             for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
             {
                 char *filtersDetails = readFile(nameOfFile); // filters
-                printf("%s\n", filtersDetails);
                 char *field = strtok(filtersDetails, delim);
                 char *value = strtok(NULL, delim);
 
                 while (field)
                 {
                     valid = isValidField(field, value, *app); // return if the current filed and value is the wanted one
-                    printf("%d\n", valid);
 
                     if (valid == false)
                     {
-
                         break;
                     }
                     field = strtok(NULL, delim);
@@ -327,7 +363,7 @@ void handler_client(int client_fd, char *msg)
                     char *output_string = app->toString();
 
                     strcat(returnedString, output_string);
-                    strcat(returnedString, "\n");
+                    strcat(returnedString, "\n\n");
                 }
             }
 
@@ -353,21 +389,20 @@ void handler_client(int client_fd, char *msg)
                 //     strcpy(msg, "Only the owner has the authorization to make any change");
                 // }
             }
-            else
-            {
-                strcpy(msg, "command doesn't exist!");
-            }
-            writeInSocket(msg, client_fd);
         }
+        else
+        {
+            strcpy(msg, "command doesn't exist!");
+        }
+        writeInSocket(msg, client_fd);
     }
 }
 char *getInputCommand(char *inputString) //command:parameters*
 {
-    printf("sunt in get\n");
+
     char *subString;
     subString = strrchr(inputString, ':') + 1;
     subString[strlen(subString) - 1] = '\0';
-    printf("Ce returnez <%s>\n", subString);
     return subString;
 }
 
@@ -568,4 +603,140 @@ bool isValidField(char *field, char *value, AppDetails app)
     }
 
     return false;
+}
+
+char *AppDetails::toString()
+{
+
+    char *finalString = (char *)malloc(1000); //change it
+    sprintf(finalString, "%d; %s; %s; %s; %s; %s; %s; %s; %s; %s; %s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
+    return finalString;
+}
+
+AppDetails::AppDetails(char *owner)
+{
+    this->owner = (char *)malloc(strlen(owner) + 1);
+    strcpy(this->owner, owner);
+    this->id = id;
+    id++;
+}
+
+void AppDetails::setFromJsonFile(char *fileName)
+{
+    char *contents = readFile(fileName);
+    char delim[] = "{},:\" \t\n";
+
+    char *field = strtok(contents, delim);
+    char *value = strtok(NULL, delim);
+    while (field)
+    {
+        setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
+        field = strtok(NULL, delim);
+        value = strtok(NULL, delim);
+        printf("\n %s %s ", field, value);
+    }
+}
+
+void AppDetails::setField(char field[], char value[])
+{
+
+    if (strcmp(field, "owner") == 0)
+    {
+        this->owner = (char *)malloc(strlen(value) + 1);
+        strcpy(this->owner, value);
+    }
+    else if (strcmp(field, "name") == 0)
+    {
+        this->name = (char *)malloc(strlen(value) + 1);
+        strcpy(this->name, value);
+    }
+    else if (strcmp(field, "author") == 0)
+    {
+        this->author = (char *)malloc(strlen(value) + 1);
+        strcpy(this->author, value);
+    }
+    else if (strcmp(field, "about") == 0)
+    {
+        this->about = (char *)malloc(strlen(value) + 1);
+        strcpy(this->about, value);
+    }
+    else if (strcmp(field, "websiteLink") == 0)
+    {
+        this->websiteLink = (char *)malloc(strlen(value) + 1);
+        strcpy(this->websiteLink, value);
+    }
+    else if (strcmp(field, "systemRequirements") == 0)
+    {
+        this->systemRequirements = (char *)malloc(strlen(value) + 1);
+        strcpy(this->systemRequirements, value);
+    }
+    else if (strcmp(field, "price") == 0)
+    {
+        this->price = (char *)malloc(strlen(value) + 1);
+        strcpy(this->price, value);
+    }
+    else if (strcmp(field, "ramMemory") == 0)
+    {
+        this->ramMemory = (char *)malloc(strlen(value) + 1);
+        strcpy(this->ramMemory, value);
+    }
+    else if (strcmp(field, "version") == 0)
+    {
+        this->version = (char *)malloc(strlen(value) + 1);
+        strcpy(this->version, value);
+    }
+    else if (strcmp(field, "otherDetails") == 0)
+    {
+        this->otherDetails = (char *)malloc(strlen(value) + 1);
+        strcpy(this->otherDetails, value);
+    }
+    // else return false
+}
+
+void AppDetails::setFromCsvLine(char *line)
+{
+
+    char delim_field[] = " ;";
+    char *field = strtok(line, delim_field);
+    this->id = atoi(field);
+
+    field = strtok(NULL, delim_field);
+    this->owner = (char *)malloc(strlen(field) + 1);
+    strcpy(this->owner, field);
+
+    field = strtok(NULL, delim_field);
+    this->name = (char *)malloc(strlen(field) + 1);
+    strcpy(this->name, field);
+
+    field = strtok(NULL, delim_field);
+    this->about = (char *)malloc(strlen(field) + 1);
+    strcpy(this->about, field);
+
+    field = strtok(NULL, delim_field);
+    this->author = (char *)malloc(strlen(field) + 1);
+    strcpy(this->author, field);
+
+    field = strtok(NULL, delim_field);
+    this->websiteLink = (char *)malloc(strlen(field) + 1);
+    strcpy(this->websiteLink, field);
+
+    field = strtok(NULL, delim_field);
+    this->systemRequirements = (char *)malloc(strlen(field) + 1);
+    strcpy(this->systemRequirements, field);
+
+    field = strtok(NULL, delim_field);
+    this->price = (char *)malloc(strlen(field) + 1);
+    strcpy(this->price, field);
+
+    field = strtok(NULL, delim_field);
+    this->ramMemory = (char *)malloc(strlen(field) + 1);
+    strcpy(this->ramMemory, field);
+
+    field = strtok(NULL, delim_field);
+    this->version = (char *)malloc(strlen(field) + 1);
+    strcpy(this->version, field);
+
+    field = strtok(NULL, delim_field);
+    this->otherDetails = (char *)malloc(strlen(field) + 1);
+    strcpy(this->otherDetails, field);
 }

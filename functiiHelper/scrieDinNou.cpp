@@ -17,7 +17,7 @@ int main()
 {
     list<AppDetails> listOfApps = getListOfApps(); // am lista de aplicatii
     // char *parameter = getInputCommand(msg);
-    char parameter[] = "1";
+    char parameter[] = "123";
     int id = atoi(parameter);
 
     FILE *file_fd = fopen(apps_file, "w+");
