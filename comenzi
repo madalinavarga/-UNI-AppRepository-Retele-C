@@ -37,14 +37,16 @@ searchApps: exista app cu filtre date => returneaza detaliile despre aplicatie
 seeApp:id
 seeApp: id existent => returneaza detaliile
         id invalid=> mesaj eroare 
+ctrl+C => handle signal => deconectare client 
 
 
 +de verificat ca imi ofera parametrii 
-+2 addNew app cu spatii=> nu este permisa => strica filed & value
-+client abandoneaza brusc 
-+delete app.. la ultima nu functioneaza ..
-rezolvate 
 
+
+
+rezolvate
+-client abandoneaza brusc 
+- delete 
 -id aplicatie resetat la orice rerulare (setat id clasa =id_global. la fiecare while iau ultimul id si il asignez lui id_g)
 
 -+probleme update cu numele utilizatorului ( am schimbat delimitatorii) check again

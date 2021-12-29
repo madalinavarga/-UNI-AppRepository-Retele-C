@@ -7,3 +7,4 @@ price:free
 ramMemory:1.0GB
 version:20.2
 otherDetails:special
+src_file:/home/madalinavarga21/Desktop/Retele/ProiectFinal/update.txt

@@ -14,7 +14,7 @@
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4006
+#define PORT 4001
 #define SIZE 1000
 
 char config_file[] = "config.txt";
@@ -36,10 +36,11 @@ public:
     char *ramMemory;
     char *version;
     char *otherDetails;
+    char *src_file;
 
     AppDetails(char *owner);
     AppDetails(){};
-    AppDetails &operator=(const AppDetails &);
+
     void setFromtxtFile(char *fileName);
     void setField(char field[], char value[]);
     void setFromCsvLine(char *line);
@@ -200,12 +201,22 @@ void handler_client(int client_fd, char *msg)
             {
                 char *fileName = getInputCommand(msg); // take a file with the new app details
                 AppDetails app(userName);              //create an object
-                printf("fileName: %s\n", fileName);
+                //fac setarea obiectului
                 app.setFromtxtFile(fileName);
-                char *output_string = app.toString();
-                printf("output: %s\n", output_string);
-                writeInFile(output_string, apps_file);
+                if (strcmp(app.src_file, "default") != 0)
+                {
+
+                    char path[100] = "";
+                    strcat(path, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate");
+
+                    char cmd[256] = "";
+                    snprintf(cmd, 256, "cp %s %s", app.src_file, path);
+                    printf("\n%s\n", cmd);
+                    system(cmd);
+                }
                 strcpy(msg, "App loaded");
+                char *output_string = app.toString();
+                writeInFile(output_string, apps_file);
                 writeInSocket(msg, client_fd);
             }
             else
@@ -665,7 +676,7 @@ char *AppDetails::toString()
 {
 
     char *finalString = (char *)malloc(SIZE); //change it
-    sprintf(finalString, "%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
+    sprintf(finalString, "%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails, this->src_file);
     return finalString;
 }
 
@@ -687,7 +698,7 @@ void AppDetails::setFromtxtFile(char *fileName)
 
     while (field)
     {
-        printf("\n %s %s ", field, value);
+
         setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
         field = strtok(NULL, delim);
         value = strtok(NULL, delim);
@@ -744,10 +755,17 @@ void AppDetails::setField(char field[], char value[])
     }
     else if (strcmp(field, "otherDetails") == 0)
     {
+        printf("dar in alta parte intru\n");
         this->otherDetails = (char *)malloc(strlen(value) + 1);
         strcpy(this->otherDetails, value);
     }
-    // else return false
+    else if (strcmp(field, "src_file") == 0)
+    {
+        printf("intru in src_file\n");
+        this->src_file = (char *)malloc(strlen(value) + 1);
+        strcpy(this->src_file, value);
+        printf("ce scrie: %s\n", this->src_file);
+    }
 }
 
 void AppDetails::setFromCsvLine(char *line)
@@ -797,30 +815,8 @@ void AppDetails::setFromCsvLine(char *line)
     field = strtok(NULL, delim_field);
     this->otherDetails = (char *)malloc(strlen(field) + 1);
     strcpy(this->otherDetails, field);
-}
 
-AppDetails &AppDetails::operator=(const AppDetails &old_obj)
-{
-    id = old_obj.id;
-    owner = (char *)malloc(strlen(old_obj.owner) + 1);
-    strcpy(owner, old_obj.owner);
-    name = (char *)malloc(strlen(old_obj.name) + 1);
-    strcpy(name, old_obj.name);
-    about = (char *)malloc(strlen(old_obj.about) + 1);
-    strcpy(about, old_obj.about);
-    author = (char *)malloc(strlen(old_obj.author) + 1);
-    strcpy(author, old_obj.author);
-    websiteLink = (char *)malloc(strlen(old_obj.websiteLink) + 1);
-    strcpy(websiteLink, old_obj.websiteLink);
-    systemRequirements = (char *)malloc(strlen(old_obj.systemRequirements) + 1);
-    strcpy(systemRequirements, old_obj.systemRequirements);
-    price = (char *)malloc(strlen(old_obj.price) + 1);
-    strcpy(price, old_obj.price);
-    ramMemory = (char *)malloc(strlen(old_obj.ramMemory) + 1);
-    strcpy(ramMemory, old_obj.ramMemory);
-    version = (char *)malloc(strlen(old_obj.version) + 1);
-    strcpy(version, old_obj.version);
-    otherDetails = (char *)malloc(strlen(old_obj.otherDetails) + 1);
-    strcpy(otherDetails, old_obj.otherDetails);
-    return *this;
+    field = strtok(NULL, delim_field);
+    this->src_file = (char *)malloc(strlen(field) + 1);
+    strcpy(this->src_file, field);
 }
