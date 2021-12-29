@@ -18,6 +18,7 @@ Adaugarea de noi aplicatii se va putea realiza de oricare client, specificindu-s
 #define SIZE 1000
 
 int port;
+int socket_descriptor;
 void writeInSocket(char buffer[], int fd);
 void readFromSocket(char *buff, int fd);
 void handle_signal(int sig);
@@ -25,7 +26,6 @@ void handle_signal(int sig);
 int main(int argc, char *argv[])
 {
 
-    int socket_descriptor;
     struct sockaddr_in server;
     char msg[SIZE];
     int number;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         perror("[client]Eroare la connect().\n");
         return errno;
     }
-    signal(SIGQUIT, handle_signal);
+    signal(SIGINT, handle_signal);
     while (1)
     {
         bzero(msg, SIZE);
@@ -94,6 +94,10 @@ void readFromSocket(char *buff, int fd)
 
 void handle_signal(int sig)
 {
-
-    signal(sig, SIG_DFL);
+    char msg[SIZE];
+    bzero(msg, SIZE);
+    strcpy(msg, "quit");
+    writeInSocket(msg, socket_descriptor);
+    readFromSocket(msg, socket_descriptor);
+    exit(0);
 }

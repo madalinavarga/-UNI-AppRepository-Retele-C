@@ -14,7 +14,7 @@
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4007
+#define PORT 4006
 #define SIZE 1000
 
 char config_file[] = "config.txt";
@@ -380,7 +380,7 @@ void handler_client(int client_fd, char *msg)
             {
                 char *parameter = getInputCommand(msg);
                 int id = atoi(parameter);
-                int line = 0;
+                int line_nr = 0;
                 FILE *file_fd_w, *file_fd_r;
 
                 for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
@@ -406,10 +406,9 @@ void handler_client(int client_fd, char *msg)
                                 char aux[100];
                                 strcpy(aux, linie);
 
-                                line = atoi(strtok(aux, ";"));
-                                printf("%d\n", line);
+                                line_nr = atoi(strtok(aux, ";"));
 
-                                if (line != id)
+                                if (line_nr != id)
                                     fputs(fileContent, file_fd_w);
                             }
                             fclose(file_fd_w);
