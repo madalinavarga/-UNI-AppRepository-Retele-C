@@ -14,18 +14,18 @@
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4000
+#define PORT 4007
 #define SIZE 1000
 
 char config_file[] = "config.txt";
 char apps_file[] = "apps.txt";
 using namespace std;
-int id = 0;
+int id_g = 0;
 char userName[50];
 class AppDetails
 {
 public:
-    int id = 0;
+    int id;
     char *owner;
     char *name;
     char *about;
@@ -39,6 +39,7 @@ public:
 
     AppDetails(char *owner);
     AppDetails(){};
+    AppDetails &operator=(const AppDetails &);
     void setFromtxtFile(char *fileName);
     void setField(char field[], char value[]);
     void setFromCsvLine(char *line);
@@ -139,16 +140,17 @@ void handler_client(int client_fd, char *msg)
     {
         bzero(msg, SIZE);
         list<AppDetails> listOfApps = getListOfApps(); //create list of apps uploaded
-        readFromSocket(msg, client_fd);                //read msg from client
+        id_g = listOfApps.end()->id;
+        readFromSocket(msg, client_fd); //read msg from client
         printf("\nmesaj:%s", msg);
         if (strstr(msg, "quit")) // if quit => exit
         {
-            printf("[client]Mesajul primit este: %s. byee client\n", msg);
+
             writeInSocket(msg, client_fd);
             close(client_fd);
             exit(0);
         }
-        else if (strstr(msg, "login:"))
+        else if (strstr(msg, "login:")) // login:nume parola
         {
             if (isLogged == FALSE)
             {
@@ -192,7 +194,7 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "addNewApp:")) //by file
+        else if (strstr(msg, "addNewApp:")) //addNewApp:file
         {
             if (isLogged == TRUE) // must be logged in
             {
@@ -212,7 +214,7 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "newUser:"))
+        else if (strstr(msg, "newUser:")) //newUser:nume parola
         {
             char *new_user_details = getInputCommand(msg); // return username password
             printf("<%s> - user datails\n", new_user_details);
@@ -224,12 +226,8 @@ void handler_client(int client_fd, char *msg)
                 continue;
             }
 
-            char *wanted_name = getFirstParameter(new_user_details); //de modificat somthing wrong
-            //printf("<%s> name\n", wanted_name);
-            printf("\nDupa ce pun in username\n\n");
-
+            char *wanted_name = getFirstParameter(new_user_details);
             int found = checkExistingUserNameOnly(wanted_name);
-            printf("found: %d\n", found);
 
             if (found == 0)
             {
@@ -258,7 +256,7 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "seeApp:")) //by id
+        else if (strstr(msg, "seeApp:")) //seeApp:id
         {
             char *id_app = getInputCommand(msg); //take the id and search it in the list
             int id = atoi(id_app);
@@ -277,7 +275,7 @@ void handler_client(int client_fd, char *msg)
 
             writeInSocket(msg, client_fd);
         }
-        else if (strstr(msg, "update:")) // by id + file with the new details
+        else if (strstr(msg, "update:")) // update:id file with the new details
         {
             if (isLogged == TRUE)
             {
@@ -333,7 +331,7 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "searchApps:")) //filename
+        else if (strstr(msg, "searchApps:")) //searchApps:filename
         {
             char returnedString[SIZE] = "";
             char *nameOfFile = getInputCommand(msg);
@@ -362,10 +360,8 @@ void handler_client(int client_fd, char *msg)
                 {
                     foundOneApp = true;
                     char *output_string = app->toString();
-                    printf("gasit <%s> with size <%d>\n", output_string, strlen(output_string));
                     strcat(returnedString, output_string);
                     strcat(returnedString, "\n\n");
-                    printf("returnedString = <%s>\n", returnedString);
                 }
             }
 
@@ -378,23 +374,72 @@ void handler_client(int client_fd, char *msg)
         }
         else if (strstr(msg, "deleteApp:"))
         {
+            int found = 0, unathorised = 0;
+
             if (isLogged == TRUE)
             {
                 char *parameter = getInputCommand(msg);
                 int id = atoi(parameter);
+                int line = 0;
+                FILE *file_fd_w, *file_fd_r;
+
                 for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
                 {
                     if (app->id == id)
                     {
                         if (strcmp(app->owner, userName) == 0)
                         {
+
+                            if ((file_fd_r = fopen(apps_file, "r")) == NULL || (file_fd_w = fopen("delete.tmp", "w+")) == NULL)
+                                printf("eroare deschidere fisier\n");
+
+                            fseek(file_fd_r, 0, SEEK_END);
+                            long file_size = ftell(file_fd_r);
+                            fseek(file_fd_r, 0, SEEK_SET);
+                            char *fileContent = (char *)malloc(file_size + 1);
+                            while (1)
+                            {
+
+                                char *linie = fgets(fileContent, file_size, file_fd_r);
+                                if (linie == NULL)
+                                    break;
+                                char aux[100];
+                                strcpy(aux, linie);
+
+                                line = atoi(strtok(aux, ";"));
+                                printf("%d\n", line);
+
+                                if (line != id)
+                                    fputs(fileContent, file_fd_w);
+                            }
+                            fclose(file_fd_w);
+                            fclose(file_fd_r);
+                            remove(apps_file);
+                            rename("delete.tmp", apps_file);
+
+                            free(fileContent);
+
+                            found = 1;
+                            strcpy(msg, "app deleted");
+                        }
+                        else
+                        {
+                            strcpy(msg, "Only the owner has the authorization to make any change");
+                            unathorised = 1;
                         }
                     }
                 }
-                // else
-                // {
-                //     strcpy(msg, "Only the owner has the authorization to make any change");
-                // }
+
+                if (found == 0)
+                    strcpy(msg, "invalid id");
+                if (unathorised == 1)
+                    strcpy(msg, "Only the owner has the authorization to make any change");
+                writeInSocket(msg, client_fd);
+            }
+            else
+            {
+                strcpy(msg, "you must to be logged in");
+                writeInSocket(msg, client_fd);
             }
         }
         else
@@ -629,8 +674,8 @@ AppDetails::AppDetails(char *owner)
 {
     this->owner = (char *)malloc(strlen(owner) + 1);
     strcpy(this->owner, owner);
-    this->id = id;
-    id++;
+    this->id = id_g;
+    id_g++;
 }
 
 void AppDetails::setFromtxtFile(char *fileName)
@@ -753,4 +798,30 @@ void AppDetails::setFromCsvLine(char *line)
     field = strtok(NULL, delim_field);
     this->otherDetails = (char *)malloc(strlen(field) + 1);
     strcpy(this->otherDetails, field);
+}
+
+AppDetails &AppDetails::operator=(const AppDetails &old_obj)
+{
+    id = old_obj.id;
+    owner = (char *)malloc(strlen(old_obj.owner) + 1);
+    strcpy(owner, old_obj.owner);
+    name = (char *)malloc(strlen(old_obj.name) + 1);
+    strcpy(name, old_obj.name);
+    about = (char *)malloc(strlen(old_obj.about) + 1);
+    strcpy(about, old_obj.about);
+    author = (char *)malloc(strlen(old_obj.author) + 1);
+    strcpy(author, old_obj.author);
+    websiteLink = (char *)malloc(strlen(old_obj.websiteLink) + 1);
+    strcpy(websiteLink, old_obj.websiteLink);
+    systemRequirements = (char *)malloc(strlen(old_obj.systemRequirements) + 1);
+    strcpy(systemRequirements, old_obj.systemRequirements);
+    price = (char *)malloc(strlen(old_obj.price) + 1);
+    strcpy(price, old_obj.price);
+    ramMemory = (char *)malloc(strlen(old_obj.ramMemory) + 1);
+    strcpy(ramMemory, old_obj.ramMemory);
+    version = (char *)malloc(strlen(old_obj.version) + 1);
+    strcpy(version, old_obj.version);
+    otherDetails = (char *)malloc(strlen(old_obj.otherDetails) + 1);
+    strcpy(otherDetails, old_obj.otherDetails);
+    return *this;
 }

@@ -38,7 +38,13 @@ seeApp:id
 seeApp: id existent => returneaza detaliile
         id invalid=> mesaj eroare 
 
-+probleme update cu numele utilizatorului ( am schimbat delimitatorii)
+
 +de verificat ca imi ofera parametrii 
-+id aplicatie resetat la orice rerulare
 +2 addNew app cu spatii=> nu este permisa => strica filed & value
++client abandoneaza brusc 
++delete app.. la ultima nu functioneaza ..
+rezolvate 
+
+-id aplicatie resetat la orice rerulare (setat id clasa =id_global. la fiecare while iau ultimul id si il asignez lui id_g)
+
+-+probleme update cu numele utilizatorului ( am schimbat delimitatorii) check again

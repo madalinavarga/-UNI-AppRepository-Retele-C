@@ -1,4 +1,4 @@
-name:App1
+name:App144
 about:aceasta este o aplicatie noua
 author:author1
 websiteLink:www.home.ro
