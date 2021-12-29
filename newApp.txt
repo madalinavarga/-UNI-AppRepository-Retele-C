@@ -1,0 +1,9 @@
+name:App1
+about:aceasta este o aplicatie noua
+author:author1
+websiteLink:www.home.ro
+systemRequirements:windows linux
+price:free
+ramMemory:1.0GB
+version:20.2
+otherDetails:special

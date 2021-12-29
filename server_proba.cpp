@@ -14,7 +14,7 @@
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4003
+#define PORT 4000
 #define SIZE 1000
 
 char config_file[] = "config.txt";
@@ -39,7 +39,7 @@ public:
 
     AppDetails(char *owner);
     AppDetails(){};
-    void setFromJsonFile(char *fileName);
+    void setFromtxtFile(char *fileName);
     void setField(char field[], char value[]);
     void setFromCsvLine(char *line);
     char *toString();
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
         {
             //parent
             close(client);
-                }
+        }
         else if (pid_general == 0)
         {
             //son
@@ -199,7 +199,7 @@ void handler_client(int client_fd, char *msg)
                 char *fileName = getInputCommand(msg); // take a file with the new app details
                 AppDetails app(userName);              //create an object
                 printf("fileName: %s\n", fileName);
-                app.setFromJsonFile(fileName);
+                app.setFromtxtFile(fileName);
                 char *output_string = app.toString();
                 printf("output: %s\n", output_string);
                 writeInFile(output_string, apps_file);
@@ -283,9 +283,7 @@ void handler_client(int client_fd, char *msg)
             {
                 char *parameters = getInputCommand(msg);
                 char *id_app = getFirstParameter(parameters);
-                printf("parametru 1 <%s>\n", id_app);
                 char *fileUpdate = getSecondParameter(parameters);
-                printf("parametru 2 <%s>\n", fileUpdate);
                 int id = atoi(id_app);
                 int found = 0, unathorised = 0;
                 for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
@@ -303,7 +301,7 @@ void handler_client(int client_fd, char *msg)
                                 if (app->id == id)
                                 {
 
-                                    app->setFromJsonFile(fileUpdate);
+                                    app->setFromtxtFile(fileUpdate);
 
                                     for (auto i = listOfApps.begin(); i != listOfApps.end(); i++)
                                     {
@@ -623,7 +621,7 @@ char *AppDetails::toString()
 {
 
     char *finalString = (char *)malloc(SIZE); //change it
-    sprintf(finalString, "%d; %s; %s; %s; %s; %s; %s; %s; %s; %s; %s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
+    sprintf(finalString, "%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
     return finalString;
 }
 
@@ -635,21 +633,20 @@ AppDetails::AppDetails(char *owner)
     id++;
 }
 
-void AppDetails::setFromJsonFile(char *fileName)
+void AppDetails::setFromtxtFile(char *fileName)
 {
     char *contents = readFile(fileName);
-    char delim[] = "{},:\" \t\n";
+    char delim[] = ":\n";
 
     char *field = strtok(contents, delim);
     char *value = strtok(NULL, delim);
-    printf("\n %s %s ", field, value);
 
     while (field)
     {
+        printf("\n %s %s ", field, value);
         setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false
         field = strtok(NULL, delim);
         value = strtok(NULL, delim);
-        printf("\n %s %s ", field, value);
     }
 }
 
@@ -711,14 +708,15 @@ void AppDetails::setField(char field[], char value[])
 
 void AppDetails::setFromCsvLine(char *line)
 {
-
-    char delim_field[] = " ;";
+    //printf("utilizator <%s>\n", userName);
+    char delim_field[] = ";";
     char *field = strtok(line, delim_field);
     this->id = atoi(field);
 
     field = strtok(NULL, delim_field);
     this->owner = (char *)malloc(strlen(field) + 1);
     strcpy(this->owner, field);
+    //printf("<%s> owner\n", this->owner);
 
     field = strtok(NULL, delim_field);
     this->name = (char *)malloc(strlen(field) + 1);

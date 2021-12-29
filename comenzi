@@ -1,16 +1,44 @@
 make
 ./server
 ./client 127.0.0.1 4447 
+
+Comenzi posibile 
 logout
-login:wrong user
-login:madalina parola
-seeApp:6
-update:6 update.json
+logout => eroare daca nu este nimeni logat, sau deconectare utilizator
+
+login:nume parola
+login:utilizator parola => gresita => eroare 
+      utilizator fara parola => eroare 
+      utilizator parola ok => conectare 
+      utilizator parola ok dar deja logat => eroare 
+
 quit
-newUser:curcubeu parola3F
+quit=>clientul se deconecteaza 
 
+newUser:nume parola
+newUser:utilizator existent => eroare 
+        utilizator ok parola incorecta ( 8 caractere + o litera mare +1 nr) => eroare 
+        utilizator ok parola ok => creaza cont + salveaza in fisier 
 
+addNewApp:fisier.json ! de modificat 
+addNewApp: utilizatorul nu este logat=>eroare 
+           utilizator logat => ok 
 
+update:id fisier.json           
+update   : utilizator nu este logat=> eroare 
+           utilizator logat id dat nu exista => eroare
+           utilizator logat id dat exista + nu este autorul=>eroare
+           utilizator logat id dat exista + este autorul=>ok
 
-id aplicatie resetat la orice rerulare
-2 addNew app cu spatii=> nu este permisa => strica filed & value
+searchApps:fisier
+searchApps: exista app cu filtre date => returneaza detaliile despre aplicatie 
+            nu exista => mesaj nu exista 
+
+seeApp:id
+seeApp: id existent => returneaza detaliile
+        id invalid=> mesaj eroare 
+
++probleme update cu numele utilizatorului ( am schimbat delimitatorii)
++de verificat ca imi ofera parametrii 
++id aplicatie resetat la orice rerulare
++2 addNew app cu spatii=> nu este permisa => strica filed & value
