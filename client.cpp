@@ -15,6 +15,7 @@ Adaugarea de noi aplicatii se va putea realiza de oricare client, specificindu-s
 #include <netdb.h>
 #include <string.h>
 #include <signal.h>
+#define SIZE 1000
 
 int port;
 void writeInSocket(char buffer[], int fd);
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
 
     int socket_descriptor;
     struct sockaddr_in server;
-    char msg[1000];
+    char msg[SIZE];
     int number;
 
     if (argc != 3)
@@ -55,10 +56,10 @@ int main(int argc, char *argv[])
     signal(SIGQUIT, handle_signal);
     while (1)
     {
-        bzero(msg, 100);
+        bzero(msg, SIZE);
         printf("[client]Introduceti comanda: ");
         fflush(stdout);
-        read(0, msg, 100); //change
+        read(0, msg, SIZE);
         writeInSocket(msg, socket_descriptor);
         readFromSocket(msg, socket_descriptor);
         printf("[client]Mesajul primit este: %s\n", msg);
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
 void writeInSocket(char buffer[], int fd)
 {
 
-    if (write(fd, buffer, 100) <= 0)
+    if (write(fd, buffer, SIZE) <= 0)
     {
         perror("[client]Eroare la write() spre server.\n");
         //return errno;
@@ -83,8 +84,8 @@ void writeInSocket(char buffer[], int fd)
 }
 void readFromSocket(char *buff, int fd)
 {
-    bzero(buff, 100);
-    if (read(fd, buff, 100) < 0)
+    bzero(buff, SIZE);
+    if (read(fd, buff, SIZE) < 0)
     {
         perror("[client]Eroare la read() de la server.\n");
         //return errno;

@@ -1,4 +1,4 @@
-make --dry-run --keep-going --print-directory
+make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/madalinavarga21/Desktop/Retele/ProiectFinal'
 g++ server_proba.cpp -o server
 g++ client.cpp -o client

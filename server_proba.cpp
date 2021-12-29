@@ -10,10 +10,12 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <iostream>
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4447
+#define PORT 4003
+#define SIZE 1000
 
 char config_file[] = "config.txt";
 char apps_file[] = "apps.txt";
@@ -55,7 +57,6 @@ char *getFirstParameter(char *givenString);
 char *getSecondParameter(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
-
 bool isValidField(char *field, char *value, AppDetails app);
 
 int main(int argc, char *argv[])
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in server;
     struct sockaddr_in clientStruct;
     int sd;
-    char msg[1000];
+    char msg[SIZE];
 
     //reuse
     int on = 1;
@@ -121,10 +122,7 @@ int main(int argc, char *argv[])
         {
             //parent
             close(client);
-            while (waitpid(-1, NULL, WNOHANG))
-                ;
-            continue;
-        }
+                }
         else if (pid_general == 0)
         {
             //son
@@ -139,7 +137,7 @@ void handler_client(int client_fd, char *msg)
     int isLogged = FALSE;
     while (1)
     {
-        bzero(msg, 100);
+        bzero(msg, SIZE);
         list<AppDetails> listOfApps = getListOfApps(); //create list of apps uploaded
         readFromSocket(msg, client_fd);                //read msg from client
         printf("\nmesaj:%s", msg);
@@ -210,16 +208,21 @@ void handler_client(int client_fd, char *msg)
             }
             else
             {
-
                 strcpy(msg, "You must be logged in to add a new app\n");
                 writeInSocket(msg, client_fd);
             }
         }
         else if (strstr(msg, "newUser:"))
         {
-
             char *new_user_details = getInputCommand(msg); // return username password
             printf("<%s> - user datails\n", new_user_details);
+
+            if (strstr(new_user_details, " ") == NULL) // only one parameter
+            {
+                strcpy(msg, "please provide a password\n");
+                writeInSocket(msg, client_fd);
+                continue;
+            }
 
             char *wanted_name = getFirstParameter(new_user_details); //de modificat somthing wrong
             //printf("<%s> name\n", wanted_name);
@@ -235,12 +238,10 @@ void handler_client(int client_fd, char *msg)
                 char *password = getSecondParameter(new_user_details);
                 printf("%s pass is \n", password);
                 int check_password = validPassword(password);
+                printf("check %d\n", check_password);
                 if (check_password == 1)
                 {
                     //utilizator + parola ok
-                    writeInFile(new_user_details, config_file);
-                    strcpy(msg, "user created\n");
-                    writeInSocket(msg, client_fd);
                     writeInFile(new_user_details, config_file);
                     strcpy(msg, "user created\n");
                     writeInSocket(msg, client_fd);
@@ -276,7 +277,7 @@ void handler_client(int client_fd, char *msg)
 
             writeInSocket(msg, client_fd);
         }
-        else if (strstr(msg, "update:")) // parameters: id + file with the new details
+        else if (strstr(msg, "update:")) // by id + file with the new details
         {
             if (isLogged == TRUE)
             {
@@ -286,7 +287,7 @@ void handler_client(int client_fd, char *msg)
                 char *fileUpdate = getSecondParameter(parameters);
                 printf("parametru 2 <%s>\n", fileUpdate);
                 int id = atoi(id_app);
-                int found = 0;
+                int found = 0, unathorised = 0;
                 for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
                 {
                     if (app->id == id)
@@ -316,12 +317,15 @@ void handler_client(int client_fd, char *msg)
                             strcpy(msg, "app updated");
                         }
                         else
-                            strcpy(msg, "Only the owner has the authorization to make any change");
+                            unathorised = 1;
                     }
                 }
 
                 if (found == 0)
                     strcpy(msg, "ivalid id");
+
+                if (unathorised == 1)
+                    strcpy(msg, "Only the owner has the authorization to make any change");
 
                 writeInSocket(msg, client_fd);
             }
@@ -331,15 +335,13 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-
         else if (strstr(msg, "searchApps:")) //filename
         {
-            char returnedString[100] = "";
-            printf("Intru in search apps\n");
-            printf("Mesajul: %s\n", msg);
+            char returnedString[SIZE] = "";
             char *nameOfFile = getInputCommand(msg);
             char delim[] = "{},:\" \t\n";
             bool valid = true;
+            bool foundOneApp = false;
 
             for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
             {
@@ -360,11 +362,18 @@ void handler_client(int client_fd, char *msg)
                 }
                 if (valid == true)
                 {
+                    foundOneApp = true;
                     char *output_string = app->toString();
-
+                    printf("gasit <%s> with size <%d>\n", output_string, strlen(output_string));
                     strcat(returnedString, output_string);
                     strcat(returnedString, "\n\n");
+                    printf("returnedString = <%s>\n", returnedString);
                 }
+            }
+
+            if (foundOneApp == false)
+            {
+                strcpy(returnedString, "Didn't find any app");
             }
 
             writeInSocket(returnedString, client_fd);
@@ -393,8 +402,8 @@ void handler_client(int client_fd, char *msg)
         else
         {
             strcpy(msg, "command doesn't exist!");
+            writeInSocket(msg, client_fd);
         }
-        writeInSocket(msg, client_fd);
     }
 }
 char *getInputCommand(char *inputString) //command:parameters*
@@ -406,10 +415,17 @@ char *getInputCommand(char *inputString) //command:parameters*
     return subString;
 }
 
-int checkExistingUser(char *wordToFind) //
+int checkExistingUser(char *usernamesAndPassword)
 {
-    char *usernamesAndPasswords = readFile(config_file);
-    if (strstr(usernamesAndPasswords, wordToFind) != NULL)
+    if (strstr(usernamesAndPassword, " ") == NULL) // only one parameter
+    {
+        return 0;
+    }
+
+    strcat(usernamesAndPassword, "\n");
+
+    char *listOfUsernamesAndPasswords = readFile(config_file); //madalina parola
+    if (strstr(listOfUsernamesAndPasswords, usernamesAndPassword) != NULL)
     {
         return 1;
     }
@@ -417,8 +433,8 @@ int checkExistingUser(char *wordToFind) //
 }
 void readFromSocket(char *buff, int fd)
 {
-    bzero(buff, 100);
-    if (read(fd, buff, 100) < 0)
+    bzero(buff, SIZE);
+    if (read(fd, buff, SIZE) < 0)
     {
         perror("[client]Eroare la read() de la server.\n");
         //return errno;
@@ -428,7 +444,7 @@ void readFromSocket(char *buff, int fd)
 void writeInSocket(char buffer[], int fd)
 {
 
-    if (write(fd, buffer, 100) <= 0)
+    if (write(fd, buffer, SIZE) <= 0)
     {
         perror("[client]Eroare la write() spre server.\n");
         //return errno;
@@ -507,13 +523,11 @@ int checkExistingUserNameOnly(char *nameToFind)
     return count;
 }
 
-bool validPassword(char *givenPass) // must be >8 characters + 1+ numbers 1+uppercase 1+lowercase
+bool validPassword(char *password) // must be >8 characters + 1+ numbers 1+uppercase 1+lowercase
 {
 
     int count_letter = 0, count_LETTER = 0, count_digits = 0, count_length = 0, something_else = 0;
-    count_length = strlen(givenPass);
-    char password[count_length];
-    strcpy(password, givenPass);
+    count_length = strlen(password);
 
     if (count_length < 8) //check length
         return false;
@@ -608,7 +622,7 @@ bool isValidField(char *field, char *value, AppDetails app)
 char *AppDetails::toString()
 {
 
-    char *finalString = (char *)malloc(1000); //change it
+    char *finalString = (char *)malloc(SIZE); //change it
     sprintf(finalString, "%d; %s; %s; %s; %s; %s; %s; %s; %s; %s; %s;", this->id, this->owner, this->name, this->about, this->author, this->websiteLink, this->systemRequirements, this->price, this->ramMemory, this->version, this->otherDetails);
     return finalString;
 }
@@ -628,6 +642,8 @@ void AppDetails::setFromJsonFile(char *fileName)
 
     char *field = strtok(contents, delim);
     char *value = strtok(NULL, delim);
+    printf("\n %s %s ", field, value);
+
     while (field)
     {
         setField(field, value); // daca setfield returneaza false => field nerecunoscut => return false

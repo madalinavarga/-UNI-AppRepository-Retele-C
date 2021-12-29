@@ -12,10 +12,5 @@ newUser:curcubeu parola3F
 
 
 
-
--probleme la newUser +login + daca dai doar nume corect 
--search app la afisare gresit + daca da un filed care nu se gaseste se blocheaza
-
--probleme la addNewApp / cred ca problema la set From json , nu merge update pt varianta cu .h
-
-
+id aplicatie resetat la orice rerulare
+2 addNew app cu spatii=> nu este permisa => strica filed & value

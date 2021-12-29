@@ -1,4 +1,6 @@
 1235; Madalina; 23; mada; lara; 123; Madalina; 23; mada; lara; 123;
 4; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; AICI; AICI; 20.2; (null);
 1; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; free; MODIFICAT; 20.2; (null);
-6; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; free; MODIFICAT; 20.2; (null);
+6; madalina; aplicatie1; inovatie; (null); www.home.ro; linux; cost6; ModificatPart2; 20.2; (null);
+1; madalina; A; mada; author1; www.home.ro; windows; paid; 1.2GB; 20.2; special;
+1; madalina; A; mada; author1; www.home.ro; windows; paid; 1.2GB; 20.2; special;
