@@ -1,7 +1,0 @@
-0;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/deCopiat.txt;
-1;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/deCopiat.txt;
-2;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/deCopiat.txt;
-3;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/deCopiat.txt;
-4;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/deCopiat.txt;
-5;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/update.txt;
-6;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/update.txt;

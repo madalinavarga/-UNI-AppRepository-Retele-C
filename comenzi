@@ -41,10 +41,13 @@ ctrl+C => handle signal => deconectare client
 
 
 +de verificat ca imi ofera parametrii 
++de facut open source 
+
 
 
 
 rezolvate
+-toate aplicatiile 
 -client abandoneaza brusc 
 - delete 
 -id aplicatie resetat la orice rerulare (setat id clasa =id_global. la fiecare while iau ultimul id si il asignez lui id_g)

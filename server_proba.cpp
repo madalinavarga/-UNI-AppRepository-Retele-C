@@ -14,7 +14,7 @@
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4001
+#define PORT 4000
 #define SIZE 1000
 
 char config_file[] = "config.txt";
@@ -60,6 +60,7 @@ char *getSecondParameter(char *subString);
 int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
 bool isValidField(char *field, char *value, AppDetails app);
+int sizeOfFile(char *filename);
 
 int main(int argc, char *argv[])
 {
@@ -203,18 +204,30 @@ void handler_client(int client_fd, char *msg)
                 AppDetails app(userName);              //create an object
                 //fac setarea obiectului
                 app.setFromtxtFile(fileName);
+                int dir_error = 0, cp_error = 0;
                 if (strcmp(app.src_file, "default") != 0)
                 {
 
-                    char path[100] = "";
-                    strcat(path, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate");
+                    char path[256];
+                    char cmd_directory[1000];
+                    char cmd[1000];
+                    char id_string[10];
+                    sprintf(id_string, "%d", app.id); //convert int id to string
 
-                    char cmd[256] = "";
-                    snprintf(cmd, 256, "cp %s %s", app.src_file, path);
-                    printf("\n%s\n", cmd);
-                    system(cmd);
+                    snprintf(path, 100, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/%s", id_string);
+                    snprintf(cmd_directory, 1000, "mkdir %s", path);
+                    dir_error = system(cmd_directory); //create directory with id name
+
+                    // strcat(path, "/"); // i can change the name
+                    // strcat(path, id_string);
+
+                    snprintf(cmd, 1000, "cp %s %s", app.src_file, path); //copy source to destination
+                    cp_error = system(cmd);
                 }
-                strcpy(msg, "App loaded");
+                if (cp_error == -1 || dir_error == -1)
+                    strcpy(msg, "Error to copy the files");
+                else
+                    strcpy(msg, "App loaded");
                 char *output_string = app.toString();
                 writeInFile(output_string, apps_file);
                 writeInSocket(msg, client_fd);
@@ -372,7 +385,7 @@ void handler_client(int client_fd, char *msg)
                     foundOneApp = true;
                     char *output_string = app->toString();
                     strcat(returnedString, output_string);
-                    strcat(returnedString, "\n\n");
+                    strcat(returnedString, "\n");
                 }
             }
 
@@ -452,6 +465,43 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
+        else if (strstr(msg, "seeAllApps"))
+        {
+            int size = sizeOfFile(apps_file);
+            char returnedString[size + 10] = "";
+            //printf("size: %d", strlen(returnedString));
+            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+            {
+                char *output_string = app->toString();
+                strcat(returnedString, output_string);
+                strcat(returnedString, "\n");
+            }
+            if (strlen(returnedString) < 1)
+            {
+                strcpy(msg, "No apps avaible");
+                writeInSocket(msg, client_fd);
+            }
+            else
+                writeInSocket(returnedString, client_fd);
+        }
+        else if (strstr(msg, "downloadApp:")) //downloadApp:id
+        {
+            char *id_app = getInputCommand(msg); //take the id and search it in the list
+            int id = atoi(id_app);
+            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+            {
+                if (app->id == id)
+                {
+                    if(strcmp(app->src_file,"default"); //daca nu este open source
+                    strcpy(msg,"this app is not open source ");
+                    else{
+                        char path[1000]; //calea pana in folderul cu fisier de trimis
+                        snprintf(path, 1000, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/%s", id_app);
+                        
+                    }
+                }
+            }
+        }
         else
         {
             strcpy(msg, "command doesn't exist!");
@@ -520,6 +570,17 @@ char *readFile(char *file)
     fileContent[file_size] = 0;
 
     return fileContent;
+}
+int sizeOfFile(char *filename)
+{
+    FILE *file_fd;
+    if ((file_fd = fopen(filename, "r")) == NULL)
+        printf("eroare deschidere fisier\n"); //open file in read mode
+
+    fseek(file_fd, 0, SEEK_END);     //change the position at the end of the file
+    long file_size = ftell(file_fd); //take the position
+    fseek(file_fd, 0, SEEK_SET);
+    return file_size;
 }
 
 void writeInFile(char *output_string, const char *file)

@@ -711,53 +711,51 @@ void AppDetails::setField(char field[], char value[])
         this->otherDetails = (char *)malloc(strlen(value) + 1);
         strcpy(this->otherDetails, value);
     }
-    // else return false
-}
 
-void AppDetails::setFromCsvLine(char *line)
-{
+    void AppDetails::setFromCsvLine(char *line)
+    {
 
-    char delim_field[] = " ;";
-    char *field = strtok(line, delim_field);
-    this->id = atoi(field);
+        char delim_field[] = " ;";
+        char *field = strtok(line, delim_field);
+        this->id = atoi(field);
 
-    field = strtok(NULL, delim_field);
-    this->owner = (char *)malloc(strlen(field) + 1);
-    strcpy(this->owner, field);
+        field = strtok(NULL, delim_field);
+        this->owner = (char *)malloc(strlen(field) + 1);
+        strcpy(this->owner, field);
 
-    field = strtok(NULL, delim_field);
-    this->name = (char *)malloc(strlen(field) + 1);
-    strcpy(this->name, field);
+        field = strtok(NULL, delim_field);
+        this->name = (char *)malloc(strlen(field) + 1);
+        strcpy(this->name, field);
 
-    field = strtok(NULL, delim_field);
-    this->about = (char *)malloc(strlen(field) + 1);
-    strcpy(this->about, field);
+        field = strtok(NULL, delim_field);
+        this->about = (char *)malloc(strlen(field) + 1);
+        strcpy(this->about, field);
 
-    field = strtok(NULL, delim_field);
-    this->author = (char *)malloc(strlen(field) + 1);
-    strcpy(this->author, field);
+        field = strtok(NULL, delim_field);
+        this->author = (char *)malloc(strlen(field) + 1);
+        strcpy(this->author, field);
 
-    field = strtok(NULL, delim_field);
-    this->websiteLink = (char *)malloc(strlen(field) + 1);
-    strcpy(this->websiteLink, field);
+        field = strtok(NULL, delim_field);
+        this->websiteLink = (char *)malloc(strlen(field) + 1);
+        strcpy(this->websiteLink, field);
 
-    field = strtok(NULL, delim_field);
-    this->systemRequirements = (char *)malloc(strlen(field) + 1);
-    strcpy(this->systemRequirements, field);
+        field = strtok(NULL, delim_field);
+        this->systemRequirements = (char *)malloc(strlen(field) + 1);
+        strcpy(this->systemRequirements, field);
 
-    field = strtok(NULL, delim_field);
-    this->price = (char *)malloc(strlen(field) + 1);
-    strcpy(this->price, field);
+        field = strtok(NULL, delim_field);
+        this->price = (char *)malloc(strlen(field) + 1);
+        strcpy(this->price, field);
 
-    field = strtok(NULL, delim_field);
-    this->ramMemory = (char *)malloc(strlen(field) + 1);
-    strcpy(this->ramMemory, field);
+        field = strtok(NULL, delim_field);
+        this->ramMemory = (char *)malloc(strlen(field) + 1);
+        strcpy(this->ramMemory, field);
 
-    field = strtok(NULL, delim_field);
-    this->version = (char *)malloc(strlen(field) + 1);
-    strcpy(this->version, field);
+        field = strtok(NULL, delim_field);
+        this->version = (char *)malloc(strlen(field) + 1);
+        strcpy(this->version, field);
 
-    field = strtok(NULL, delim_field);
-    this->otherDetails = (char *)malloc(strlen(field) + 1);
-    strcpy(this->otherDetails, field);
-}
+        field = strtok(NULL, delim_field);
+        this->otherDetails = (char *)malloc(strlen(field) + 1);
+        strcpy(this->otherDetails, field);
+    }
