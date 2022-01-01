@@ -1,3 +1,0 @@
-ramMemory:MAAAA
-price:freE
-src_file:/home/madalinavarga21/Desktop/Retele/ProiectFinal/config.txt
