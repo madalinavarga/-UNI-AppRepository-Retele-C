@@ -13,15 +13,16 @@
 #include <ctype.h>
 #include <iostream>
 #include <list>
+
 #define FALSE 0
 #define TRUE 1
-#define PORT 4001
+#define PORT 4000
 #define SIZE 1000
 
 char config_file[] = "config.txt";
 char apps_file[] = "apps.txt";
 using namespace std;
-int id_g = 0;
+int id_g = 0, check_param = 0;
 char userName[50];
 class AppDetails
 {
@@ -62,6 +63,7 @@ int checkExistingUserNameOnly(char *nameToFind);
 bool validPassword(char *givenPass);
 bool isValidField(char *field, char *value, AppDetails app);
 int sizeOfFile(char *filename);
+int validParameters(char *inputString, int number);
 
 int main(int argc, char *argv[])
 {
@@ -155,31 +157,40 @@ void handler_client(int client_fd, char *msg)
         }
         else if (strstr(msg, "login:")) // login:nume parola
         {
-            if (isLogged == FALSE)
+            check_param = validParameters(msg, 1);
+            if (check_param == 1)
             {
-                strcpy(userName, " ");
-                char *userAccountDetails = getInputCommand(msg); // return username password
-
-                int found = checkExistingUser(userAccountDetails); // search if username and password exists
-                printf("%d\n", found);
-                if (found != 0) //yes
+                if (isLogged == FALSE)
                 {
+                    strcpy(userName, " ");
+                    char *userAccountDetails = getInputCommand(msg); // return username password
 
-                    isLogged = TRUE;
-                    char *user_ptr = getFirstParameter(userAccountDetails); // save the username for next requests
-                    strcpy(userName, user_ptr);
-                    strcpy(msg, "Logged in");
-                    writeInSocket(msg, client_fd); // return succes msg
+                    int found = checkExistingUser(userAccountDetails); // search if username and password exists
+                    printf("%d\n", found);
+                    if (found != 0) //yes
+                    {
+
+                        isLogged = TRUE;
+                        char *user_ptr = getFirstParameter(userAccountDetails); // save the username for next requests
+                        strcpy(userName, user_ptr);
+                        strcpy(msg, "Logged in");
+                        writeInSocket(msg, client_fd); // return succes msg
+                    }
+                    else // user doesn't exist
+                    {
+                        strcpy(msg, "User does not exist");
+                        writeInSocket(msg, client_fd);
+                    }
                 }
-                else // user doesn't exist
+                else
                 {
-                    strcpy(msg, "User does not exist");
+                    strcpy(msg, "already logged in");
                     writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                strcpy(msg, "already logged in");
+                strcpy(msg, "incorrect number of parameters");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -199,356 +210,425 @@ void handler_client(int client_fd, char *msg)
         }
         else if (strstr(msg, "addNewApp:")) //addNewApp:file
         {
-            if (isLogged == TRUE) // must be logged in
+            check_param = validParameters(msg, 0);
+            if (check_param == 1)
             {
-                listOfApps = getListOfApps();          //refresh
-                id_g = listOfApps.end()->id;           //set the last id nr
-                char *fileName = getInputCommand(msg); // take the parameter: a file with the new app details
-                AppDetails app(userName);              //create an object
-                //set the object attributes
-                app.setFromtxtFile(fileName);
-                int dir_error = 0, open_fd = 0;
-                if (strcmp(app.src_file, "default") != 0) // check is open source
+
+                if (isLogged == TRUE) // must be logged in
                 {
-                    //save the file
-                    char path_server[256];
-                    char id_string[10];
-                    sprintf(id_string, "%d", app.id); //convert int id to string
+                    listOfApps = getListOfApps();          //refresh
+                    id_g = listOfApps.end()->id;           //set the last id nr
+                    char *fileName = getInputCommand(msg); // take the parameter: a file with the new app details
+                    AppDetails app(userName);              //create an object
+                    //set the object attributes
+                    app.setFromtxtFile(fileName);
+                    int dir_error = 0, open_fd = 0;
+                    if (strcmp(app.src_file, "default") != 0) // check is open source
+                    {
+                        //save the file
+                        char path_server[256];
+                        char id_string[10];
+                        sprintf(id_string, "%d", app.id); //convert int id to string
 
-                    char *contentFile = readFile(app.src_file); // take the content of file
-                    int size = strlen(contentFile);             // save the size of the content of file
-                    snprintf(path_server, 256, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/%s/", id_string);
-                    dir_error = mkdir(path_server, 0777); //create a new directory with the id name
+                        char *contentFile = readFile(app.src_file); // take the content of file
+                        int size = strlen(contentFile);             // save the size of the content of file
+                        snprintf(path_server, 256, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/%s/", id_string);
+                        dir_error = mkdir(path_server, 0777); //create a new directory with the id name
 
-                    char *nameOfFile;
-                    nameOfFile = strrchr(app.src_file, '/') + 1;
-                    printf("nume returnat: %s", nameOfFile);
+                        char *nameOfFile;
+                        nameOfFile = strrchr(app.src_file, '/') + 1;
+                        printf("nume returnat: %s", nameOfFile);
 
-                    strcat(path_server, nameOfFile); //add to path
-                    app.src_file = (char *)malloc(strlen(path_server));
-                    strcpy(app.src_file, path_server);
-                    open_fd = open(path_server, O_CREAT | O_WRONLY | O_TRUNC, 0777); //create file
-                    int check = write(open_fd, contentFile, size);                   // write the content in the new file
-                    if (check < 0)
-                        printf("eroare scriere in fisier\n");
+                        strcat(path_server, nameOfFile); //add to path
+                        app.src_file = (char *)malloc(strlen(path_server));
+                        strcpy(app.src_file, path_server);
+                        open_fd = open(path_server, O_CREAT | O_WRONLY | O_TRUNC, 0777); //create file
+                        int check = write(open_fd, contentFile, size);                   // write the content in the new file
+                        if (check < 0)
+                            printf("eroare scriere in fisier\n");
+                    }
+                    if (dir_error == -1 || open_fd == -1)
+                        strcpy(msg, "Error to copy the files");
+                    else
+                        snprintf(msg, SIZE, "App loaded with id: %d", app.id);
+                    char *output_string = app.toString();
+                    writeInFile(output_string, apps_file); //save the new app
+                    writeInSocket(msg, client_fd);
                 }
-                if (dir_error == -1 || open_fd == -1)
-                    strcpy(msg, "Error to copy the files");
                 else
-                    snprintf(msg, SIZE, "App loaded with id: %d", app.id);
-                char *output_string = app.toString();
-                writeInFile(output_string, apps_file); //save the new app
-                writeInSocket(msg, client_fd);
+                {
+                    strcpy(msg, "You must be logged in to add a new app\n");
+                    writeInSocket(msg, client_fd);
+                }
             }
             else
             {
-                strcpy(msg, "You must be logged in to add a new app\n");
+                strcpy(msg, "incorrect number of parameters");
                 writeInSocket(msg, client_fd);
             }
         }
         else if (strstr(msg, "newUser:")) //newUser:nume parola
         {
-            char *new_user_details = getInputCommand(msg); // return username password
-
-            if (strstr(new_user_details, " ") == NULL) // only one parameter
+            check_param = validParameters(msg, 1);
+            if (check_param == 1)
             {
-                strcpy(msg, "please provide a password\n");
-                writeInSocket(msg, client_fd);
-                continue;
-            }
+                char *new_user_details = getInputCommand(msg); // return username password
+                char *wanted_name = getFirstParameter(new_user_details);
+                int found = checkExistingUserNameOnly(wanted_name);
 
-            char *wanted_name = getFirstParameter(new_user_details);
-            int found = checkExistingUserNameOnly(wanted_name);
-
-            if (found == 0)
-            {
-                // the wanted username is avaible => continue
-
-                char *password = getSecondParameter(new_user_details);
-                int check_password = validPassword(password);
-
-                if (check_password == 1)
+                if (found == 0)
                 {
-                    //good pass => create account
-                    writeInFile(new_user_details, config_file);
-                    strcpy(msg, "user created\n");
-                    writeInSocket(msg, client_fd);
+                    // the wanted username is avaible => continue
+
+                    char *password = getSecondParameter(new_user_details);
+                    int check_password = validPassword(password);
+
+                    if (check_password == 1)
+                    {
+                        //good pass => create account
+                        writeInFile(new_user_details, config_file);
+                        strcpy(msg, "user created\n");
+                        writeInSocket(msg, client_fd);
+                    }
+                    else
+                    {
+                        strcpy(msg, "incorrect password format\n");
+                        writeInSocket(msg, client_fd);
+                    }
                 }
                 else
                 {
-                    strcpy(msg, "incorrect password format\n");
+                    strcpy(msg, "username already exists\n");
                     writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                strcpy(msg, "username already exists\n");
+                strcpy(msg, "incorrect number of parameters");
                 writeInSocket(msg, client_fd);
             }
         }
         else if (strstr(msg, "seeApp:")) //seeApp:id
         {
-            char *id_app = getInputCommand(msg); //take the id and search it in the list
-            int id = atoi(id_app);
-            int found = 0;
-            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //check if the id is in the list
+            check_param = validParameters(msg, 0);
+            if (check_param == 1)
             {
-                if (app->id == id)
-                {
-                    strcpy(msg, app->toString()); //convert it to string and return the details to the client
-                    found = 1;
-                    break;
-                }
-            }
-            if (found == 0)
-                strcpy(msg, "ivalid id");
-
-            writeInSocket(msg, client_fd);
-        }
-        else if (strstr(msg, "update:")) // update:id file with the new details
-        {
-            if (isLogged == TRUE) //must be logged in
-            {
-                char *parameters = getInputCommand(msg);
-                char *id_app = getFirstParameter(parameters);      //take the id
-                char *fileUpdate = getSecondParameter(parameters); //take the file name
+                char *id_app = getInputCommand(msg); //take the id and search it in the list
                 int id = atoi(id_app);
-                int found = 0, unathorised = 0;
-                FILE *file_fd = fopen(apps_file, "w+");
-                fseek(file_fd, 0, SEEK_SET);
-                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //fie sterg tot si scriu iar.. fie parcurg lista de 2 ori?!
+                int found = 0;
+                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //check if the id is in the list
                 {
-                    if (app->id == id) // check if the id is in the list
+                    if (app->id == id)
                     {
-                        if (strcmp(app->owner, userName) == 0) // check if the user is the owner
-                        {
-                            found++;
-
-                            if (strcmp(app->src_file, "default") != 0)
-                            {
-
-                                char old_file[256]; //take the old file path
-                                strcpy(old_file, app->src_file);
-                                // printf("lungimee:\n %d", strlen(app->src_file));
-                                app->setFromtxtFile(fileUpdate); //reset the attributes
-
-                                char path_server[256];
-                                char *contentFile = readFile(app->src_file); // take the content of file
-                                int size = strlen(contentFile);              // save the size of the content of file
-                                snprintf(path_server, 256, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/%s/", id_app);
-                                char *nameOfFile;
-                                nameOfFile = strrchr(app->src_file, '/') + 1;
-                                printf("\nce ramane \n%s\n", app->src_file);
-
-                                strcat(path_server, nameOfFile); //add to path
-                                app->src_file = (char *)malloc(strlen(path_server));
-                                strcpy(app->src_file, path_server);
-                                int open_fd = open(path_server, O_CREAT | O_WRONLY | O_TRUNC, 0777); //create file
-                                printf("\nce ramane2 \n%s\n", app->src_file);
-
-                                int check = write(open_fd, contentFile, size);
-                                if (check < 0)
-                                    printf("eroare scriere in fisier\n");
-                                printf("nume la ce sterg:\n %s", old_file);
-                                remove(old_file);
-                            }
-                            else
-                                app->setFromtxtFile(fileUpdate); //reset the attributes
-                        }
-                        else
-                            unathorised = 1;
+                        strcpy(msg, app->toString()); //convert it to string and return the details to the client
+                        found = 1;
+                        break;
                     }
-
-                    char *output_string = app->toString();
-                    fprintf(file_fd, "%s\n", output_string);
                 }
-                strcpy(msg, "app updated");
-                fclose(file_fd);
-
                 if (found == 0)
                     strcpy(msg, "ivalid id");
 
-                if (unathorised == 1)
-                    strcpy(msg, "Only the owner has the authorization to make any change");
-
                 writeInSocket(msg, client_fd);
             }
-
             else
             {
-                strcpy(msg, "you must to be logged in");
+                strcpy(msg, "incorrect number of parameters");
+                writeInSocket(msg, client_fd);
+            }
+        }
+        else if (strstr(msg, "update:")) // update:id file with the new details
+        {
+            check_param = validParameters(msg, 1);
+            if (check_param == 1)
+            {
+                if (isLogged == TRUE) //must be logged in
+                {
+                    char *parameters = getInputCommand(msg);
+                    char *id_app = getFirstParameter(parameters);      //take the id
+                    char *fileUpdate = getSecondParameter(parameters); //take the file name
+                    int id = atoi(id_app);
+                    int found = 0, unathorised = 0;
+                    FILE *file_fd = fopen(apps_file, "w+");
+                    fseek(file_fd, 0, SEEK_SET);
+                    for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //fie sterg tot si scriu iar.. fie parcurg lista de 2 ori?!
+                    {
+                        if (app->id == id) // check if the id is in the list
+                        {
+                            if (strcmp(app->owner, userName) == 0) // check if the user is the owner
+                            {
+                                found++;
+
+                                if (strcmp(app->src_file, "default") != 0)
+                                {
+
+                                    char old_file[256]; //take the old file path
+                                    strcpy(old_file, app->src_file);
+
+                                    app->setFromtxtFile(fileUpdate); //reset the attributes
+
+                                    char path_server[256];
+                                    char *contentFile = readFile(app->src_file); // take the content of file
+                                    int size = strlen(contentFile);              // save the size of the content of file
+                                    snprintf(path_server, 256, "/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/%s/", id_app);
+                                    char *nameOfFile;
+                                    nameOfFile = strrchr(app->src_file, '/') + 1;
+
+                                    strcat(path_server, nameOfFile); //add to path
+                                    app->src_file = (char *)malloc(strlen(path_server));
+                                    strcpy(app->src_file, path_server);
+                                    int open_fd = open(path_server, O_CREAT | O_WRONLY | O_TRUNC, 0777); //create file
+
+                                    int check = write(open_fd, contentFile, size);
+                                    if (check < 0)
+                                        printf("eroare scriere in fisier\n");
+                                    printf("nume la ce sterg:\n %s", old_file);
+                                    remove(old_file);
+                                }
+                                else
+                                    app->setFromtxtFile(fileUpdate); //reset the attributes
+                            }
+                            else
+                                unathorised = 1;
+                        }
+
+                        char *output_string = app->toString();
+                        fprintf(file_fd, "%s\n", output_string);
+                    }
+                    strcpy(msg, "app updated");
+                    fclose(file_fd);
+
+                    if (found == 0)
+                        strcpy(msg, "ivalid id");
+
+                    if (unathorised == 1)
+                        strcpy(msg, "Only the owner has the authorization to make any change");
+
+                    writeInSocket(msg, client_fd);
+                }
+
+                else
+                {
+                    strcpy(msg, "you must to be logged in");
+                    writeInSocket(msg, client_fd);
+                }
+            }
+            else
+            {
+                strcpy(msg, "incorrect number of parameters");
                 writeInSocket(msg, client_fd);
             }
         }
         else if (strstr(msg, "searchApps:")) //searchApps:filename
         {
-            char returnedString[SIZE] = "";
-            char *nameOfFile = getInputCommand(msg);
-            char delim[] = "{},:\" \t\n";
-            bool valid = true;
-            bool foundOneApp = false;
-
-            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+            check_param = validParameters(msg, 0);
+            if (check_param == 1)
             {
-                char *filtersDetails = readFile(nameOfFile); // filters
-                char *field = strtok(filtersDetails, delim);
-                char *value = strtok(NULL, delim);
+                char returnedString[SIZE] = "";
+                char *nameOfFile = getInputCommand(msg);
+                char delim[] = "{},:\" \t\n";
+                bool valid = true;
+                bool foundOneApp = false;
 
-                while (field) // for each app check all filters
+                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
                 {
-                    valid = isValidField(field, value, *app); // return if the current filed and value is the wanted one
+                    char *filtersDetails = readFile(nameOfFile); // filters
+                    char *field = strtok(filtersDetails, delim);
+                    char *value = strtok(NULL, delim);
 
-                    if (valid == false)
+                    while (field) // for each app check all filters
                     {
-                        break;
-                    }
-                    field = strtok(NULL, delim);
-                    value = strtok(NULL, delim);
-                }
-                if (valid == true) //match
-                {
-                    foundOneApp = true;
-                    char *output_string = app->toString();
-                    strcat(returnedString, output_string); // add it to the returned string
-                    strcat(returnedString, "\n");
-                }
-            }
+                        valid = isValidField(field, value, *app); // return if the current filed and value is the wanted one
 
-            if (foundOneApp == false)
-            {
-                strcpy(returnedString, "Didn't find any app");
-            }
-
-            writeInSocket(returnedString, client_fd);
-        }
-        else if (strstr(msg, "deleteApp:"))
-        {
-            int found = 0, unathorised = 0;
-
-            if (isLogged == TRUE) //must be logged in
-            {
-                char *parameter = getInputCommand(msg);
-                int id = atoi(parameter);
-                int line_id = 0;
-                FILE *file_fd_w, *file_fd_r;
-
-                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //search for the id
-                {
-                    if (app->id == id)
-                    {
-                        if (strcmp(app->owner, userName) == 0) //check the username = owner
+                        if (valid == false)
                         {
-                            //open the apps file in read mode and a temporary app in write
-                            if ((file_fd_r = fopen(apps_file, "r")) == NULL || (file_fd_w = fopen("delete.tmp", "w+")) == NULL)
-                                printf("eroare deschidere fisier\n");
-
-                            long file_size = sizeOfFile(apps_file);
-                            char *fileContent = (char *)malloc(file_size + 1);
-                            while (1) //while i still have lines to read
-                            {
-
-                                char *linie = fgets(fileContent, file_size, file_fd_r);
-                                if (linie == NULL)
-                                    break;
-                                char aux[100];
-                                strcpy(aux, linie); //copy the line to find the id of each app
-
-                                line_id = atoi(strtok(aux, ";"));
-
-                                if (line_id != id) //if the given id is not the current one, write the line in file
-                                    fputs(fileContent, file_fd_w);
-                            }
-                            fclose(file_fd_w);
-                            fclose(file_fd_r);
-                            remove(apps_file);
-                            rename("delete.tmp", apps_file);
-
-                            free(fileContent);
-
-                            found = 1;
-                            strcpy(msg, "app deleted");
+                            break;
                         }
-                        else
-                        {
-                            strcpy(msg, "Only the owner has the authorization to make any change");
-                            unathorised = 1;
-                        }
+                        field = strtok(NULL, delim);
+                        value = strtok(NULL, delim);
                     }
-                }
-
-                if (found == 0)
-                    strcpy(msg, "invalid id");
-                if (unathorised == 1)
-                    strcpy(msg, "Only the owner has the authorization to make any change");
-                writeInSocket(msg, client_fd);
-            }
-            else
-            {
-                strcpy(msg, "you must to be logged in");
-                writeInSocket(msg, client_fd);
-            }
-        }
-        else if (strstr(msg, "seeAllApps:"))
-        {
-            char *firstParam = getInputCommand(msg);
-            int page_number = atoi(firstParam);
-            int first_app = page_number * 5 - 5; // give the apps between line first and last
-            int line_index = 0, count = 5;
-            int size = sizeOfFile(apps_file);
-            char returnedString[size] = ""; //a string with all apps
-
-            for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
-            {
-                if (line_index == first_app)
-                {
-                    if (count > 0)
+                    if (valid == true) //match
                     {
+                        foundOneApp = true;
                         char *output_string = app->toString();
-                        strcat(returnedString, output_string);
+                        strcat(returnedString, output_string); // add it to the returned string
                         strcat(returnedString, "\n");
                     }
-
-                    first_app++;
-                    count--;
                 }
-                line_index++;
-            }
-            if (strlen(returnedString) < 1)
-            {
-                strcpy(msg, "No apps avaible");
-                writeInSocket(msg, client_fd);
+
+                if (foundOneApp == false)
+                {
+                    strcpy(returnedString, "Didn't find any app");
+                }
+
+                writeInSocket(returnedString, client_fd);
             }
             else
-                writeInSocket(returnedString, client_fd);
+            {
+                strcpy(msg, "incorrect number of parameters");
+                writeInSocket(msg, client_fd);
+            }
+        }
+        else if (strstr(msg, "deleteApp:")) //id
+        {
+            check_param = validParameters(msg, 0);
+            if (check_param == 1)
+            {
+                int found = 0, unathorised = 0;
+
+                if (isLogged == TRUE) //must be logged in
+                {
+                    char *parameter = getInputCommand(msg);
+                    int id = atoi(parameter);
+                    int line_id = 0;
+                    FILE *file_fd_w, *file_fd_r;
+                    char path_file[256];
+
+                    for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //search for the id
+                    {
+                        if (app->id == id)
+                        {
+                            if (strcmp(app->owner, userName) == 0) //check the username = owner
+                            {
+                                strcpy(path_file, app->src_file);
+                                //open the apps file in read mode and a temporary app in write
+                                if ((file_fd_r = fopen(apps_file, "r")) == NULL || (file_fd_w = fopen("delete.tmp", "w+")) == NULL)
+                                    printf("eroare deschidere fisier\n");
+
+                                long file_size = sizeOfFile(apps_file);
+                                char *fileContent = (char *)malloc(file_size + 1);
+                                while (1) //while i still have lines to read
+                                {
+
+                                    char *linie = fgets(fileContent, file_size, file_fd_r);
+                                    if (linie == NULL)
+                                        break;
+                                    char aux[100];
+                                    strcpy(aux, linie); //copy the line to find the id of each app
+
+                                    line_id = atoi(strtok(aux, ";"));
+
+                                    if (line_id != id) //if the given id is not the current one, write the line in file
+                                        fputs(fileContent, file_fd_w);
+                                }
+                                fclose(file_fd_w);
+                                fclose(file_fd_r);
+                                remove(apps_file);
+                                rename("delete.tmp", apps_file);
+
+                                free(fileContent);
+                                if (strcmp(path_file, "default") != 0)
+                                {
+                                    remove(path_file);
+                                }
+
+                                found = 1;
+                                strcpy(msg, "app deleted");
+                            }
+                            else
+                            {
+                                strcpy(msg, "Only the owner has the authorization to make any change");
+                                unathorised = 1;
+                            }
+                        }
+                    }
+
+                    if (found == 0)
+                        strcpy(msg, "invalid id");
+                    if (unathorised == 1)
+                        strcpy(msg, "Only the owner has the authorization to make any change");
+                    writeInSocket(msg, client_fd);
+                }
+                else
+                {
+                    strcpy(msg, "you must to be logged in");
+                    writeInSocket(msg, client_fd);
+                }
+            }
+            else
+            {
+                strcpy(msg, "incorrect number of parameters");
+                writeInSocket(msg, client_fd);
+            }
+        }
+        else if (strstr(msg, "seeAllApps:")) //page nr
+        {
+            check_param = validParameters(msg, 0);
+            if (check_param == 1)
+            {
+                char *firstParam = getInputCommand(msg);
+                int page_number = atoi(firstParam);
+                int first_app = page_number * 5 - 5;
+                int line_index = 0, count = 5;
+                int size = sizeOfFile(apps_file);
+                char returnedString[size] = ""; //a string with all apps
+
+                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+                {
+                    if (line_index == first_app)
+                    {
+                        if (count > 0)
+                        {
+                            char *output_string = app->toString();
+                            strcat(returnedString, output_string);
+                            strcat(returnedString, "\n");
+                        }
+
+                        first_app++;
+                        count--;
+                    }
+                    line_index++;
+                }
+                if (strlen(returnedString) < 1)
+                {
+                    strcpy(msg, "No apps avaible");
+                    writeInSocket(msg, client_fd);
+                }
+                else
+                    writeInSocket(returnedString, client_fd);
+            }
+            else
+            {
+                strcpy(msg, "incorrect number of parameters");
+                writeInSocket(msg, client_fd);
+            }
         }
         else if (strstr(msg, "downloadApp:")) //downloadApp:id
         {
-            if (isLogged == TRUE)
+            check_param = validParameters(msg, 0);
+            if (check_param == 1)
             {
-                char *id_app = getInputCommand(msg); //take the id and search it in the list
-                int id = atoi(id_app);
-                int found = 0;
-                for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
+                if (isLogged == TRUE)
                 {
-                    if (app->id == id)
+                    char *id_app = getInputCommand(msg); //take the id and search it in the list
+                    int id = atoi(id_app);
+                    int found = 0;
+                    for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
                     {
-                        found = 1;
-                        if (strcmp(app->src_file, "default") == 0) // check if the app is open source
-                            strcpy(msg, "this app is not open source ");
-                        else
+                        if (app->id == id)
                         {
-                            strcpy(msg, app->src_file);
+                            found = 1;
+                            if (strcmp(app->src_file, "default") == 0) // check if the app is open source
+                                strcpy(msg, "this app is not open source ");
+                            else
+                            {
+                                strcpy(msg, app->src_file);
+                            }
                         }
                     }
-                }
-                if (found == 0)
-                    strcpy(msg, "app doesn't exist");
+                    if (found == 0)
+                        strcpy(msg, "app doesn't exist");
 
-                writeInSocket(msg, client_fd);
+                    writeInSocket(msg, client_fd);
+                }
+                else
+                {
+                    strcpy(msg, "You are not logged in");
+                    writeInSocket(msg, client_fd);
+                }
             }
             else
             {
-                strcpy(msg, "You are not logged in");
+                strcpy(msg, "incorrect number of parameters");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -781,7 +861,43 @@ bool isValidField(char *field, char *value, AppDetails app)
 
     return false;
 }
+int validParameters(char *inputString, int number)
+{
+    int size = strlen(inputString);
+    int count_space = 0;
+    int count_param = 0, j = 0;
+    for (int i = 0; i < size; i++)
+    {
 
+        if (inputString[i] == ' ')
+            count_space++;
+        if (number == 0)
+            if (inputString[i] == ':')
+                j = i;
+    }
+    if (number == 0)
+    {
+        for (int i = j + 1; i < size; i++)
+        {
+            printf("text:<%c>\n", inputString[i]);
+
+            if (inputString[i] != ' ' && inputString[i] != '\n')
+                count_param++;
+        }
+    }
+    printf("count_param: %d\n", count_param);
+    if (number == 0)
+    {
+        if (count_param > 1)
+            return 1;
+    }
+    else
+
+        if (count_space == number)
+        return 1;
+
+    return 0;
+}
 char *AppDetails::toString()
 {
 
@@ -865,22 +981,21 @@ void AppDetails::setField(char field[], char value[])
     }
     else if (strcmp(field, "otherDetails") == 0)
     {
-        printf("dar in alta parte intru\n");
+
         this->otherDetails = (char *)malloc(strlen(value) + 1);
         strcpy(this->otherDetails, value);
     }
     else if (strcmp(field, "src_file") == 0)
     {
-        printf("intru in src_file\n");
+
         this->src_file = (char *)malloc(strlen(value) + 1);
         strcpy(this->src_file, value);
-        printf("ce scrie: %s\n", this->src_file);
     }
 }
 
 void AppDetails::setFromCsvLine(char *line)
 {
-    //printf("utilizator <%s>\n", userName);
+
     char delim_field[] = ";";
     char *field = strtok(line, delim_field);
     this->id = atoi(field);
@@ -888,7 +1003,6 @@ void AppDetails::setFromCsvLine(char *line)
     field = strtok(NULL, delim_field);
     this->owner = (char *)malloc(strlen(field) + 1);
     strcpy(this->owner, field);
-    //printf("<%s> owner\n", this->owner);
 
     field = strtok(NULL, delim_field);
     this->name = (char *)malloc(strlen(field) + 1);

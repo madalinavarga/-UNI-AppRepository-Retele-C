@@ -1,7 +1,0 @@
-0;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/0/update.txt;
-1;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/1/update.txt;
-2;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;freE;MAAAA;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/2/config.txt;
-3;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;freE;MAAAA;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/3/config.txt;
-4;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/4/update.txt;
-5;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/5/update.txt;
-6;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/6/update.txt;
