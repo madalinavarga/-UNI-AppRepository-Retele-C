@@ -147,7 +147,7 @@ void handler_client(int client_fd, char *msg)
         list<AppDetails> listOfApps = getListOfApps(); //create list of all apps uploaded
         id_g = listOfApps.end()->id;                   //set the last id nr
         readFromSocket(msg, client_fd);                //read msg from client
-        printf("\nmesaj:%s", msg);
+        printf("mesaj:%s\n", msg);
         if (strstr(msg, "quit")) // quit
         {
 
@@ -163,34 +163,32 @@ void handler_client(int client_fd, char *msg)
                 if (isLogged == FALSE)
                 {
                     strcpy(userName, " ");
-                    char *userAccountDetails = getInputCommand(msg); // return username password
-
+                    char *userAccountDetails = getInputCommand(msg);   // return username password
                     int found = checkExistingUser(userAccountDetails); // search if username and password exists
-                    printf("%d\n", found);
-                    if (found != 0) //yes
+                    if (found != 0)                                    //yes
                     {
 
                         isLogged = TRUE;
                         char *user_ptr = getFirstParameter(userAccountDetails); // save the username for next requests
                         strcpy(userName, user_ptr);
-                        strcpy(msg, "Logged in");
+                        strcpy(msg, "Logged in\n");
                         writeInSocket(msg, client_fd); // return succes msg
                     }
                     else // user doesn't exist
                     {
-                        strcpy(msg, "User does not exist");
+                        strcpy(msg, "User does not exist\n");
                         writeInSocket(msg, client_fd);
                     }
                 }
                 else
                 {
-                    strcpy(msg, "already logged in");
+                    strcpy(msg, "already logged in\n");
                     writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -199,12 +197,12 @@ void handler_client(int client_fd, char *msg)
             if (isLogged == TRUE)
             {
                 isLogged = FALSE;
-                strcpy(msg, "Logged out");
+                strcpy(msg, "Logged out\n");
                 writeInSocket(msg, client_fd);
             }
             else
             {
-                strcpy(msg, "you are not logged in");
+                strcpy(msg, "you are not logged in\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -263,7 +261,7 @@ void handler_client(int client_fd, char *msg)
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -304,7 +302,7 @@ void handler_client(int client_fd, char *msg)
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -326,13 +324,13 @@ void handler_client(int client_fd, char *msg)
                     }
                 }
                 if (found == 0)
-                    strcpy(msg, "ivalid id");
+                    strcpy(msg, "ivalid id\n");
 
                 writeInSocket(msg, client_fd);
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -394,27 +392,27 @@ void handler_client(int client_fd, char *msg)
                         char *output_string = app->toString();
                         fprintf(file_fd, "%s\n", output_string);
                     }
-                    strcpy(msg, "app updated");
+                    strcpy(msg, "app updated\n");
                     fclose(file_fd);
 
                     if (found == 0)
-                        strcpy(msg, "ivalid id");
+                        strcpy(msg, "ivalid id\n");
 
                     if (unathorised == 1)
-                        strcpy(msg, "Only the owner has the authorization to make any change");
+                        strcpy(msg, "Only the owner has the authorization to make any change\n");
 
                     writeInSocket(msg, client_fd);
                 }
 
                 else
                 {
-                    strcpy(msg, "you must to be logged in");
+                    strcpy(msg, "you must to be logged in\n");
                     writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -451,20 +449,20 @@ void handler_client(int client_fd, char *msg)
                         foundOneApp = true;
                         char *output_string = app->toString();
                         strcat(returnedString, output_string); // add it to the returned string
-                        strcat(returnedString, "\n");
+                        strcat(returnedString, "\n\n");
                     }
                 }
 
                 if (foundOneApp == false)
                 {
-                    strcpy(returnedString, "Didn't find any app");
+                    strcpy(returnedString, "Didn't find any app\n");
                 }
 
                 writeInSocket(returnedString, client_fd);
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -522,31 +520,31 @@ void handler_client(int client_fd, char *msg)
                                 }
 
                                 found = 1;
-                                strcpy(msg, "app deleted");
+                                strcpy(msg, "app deleted\n");
                             }
                             else
                             {
-                                strcpy(msg, "Only the owner has the authorization to make any change");
+                                strcpy(msg, "Only the owner has the authorization to make any change\n");
                                 unathorised = 1;
                             }
                         }
                     }
 
                     if (found == 0)
-                        strcpy(msg, "invalid id");
+                        strcpy(msg, "invalid id\n");
                     if (unathorised == 1)
-                        strcpy(msg, "Only the owner has the authorization to make any change");
+                        strcpy(msg, "Only the owner has the authorization to make any change\n");
                     writeInSocket(msg, client_fd);
                 }
                 else
                 {
-                    strcpy(msg, "you must to be logged in");
+                    strcpy(msg, "you must to be logged in\n");
                     writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -556,17 +554,17 @@ void handler_client(int client_fd, char *msg)
             if (check_param == 1)
             {
                 char *firstParam = getInputCommand(msg);
-                int page_number = atoi(firstParam);
-                int first_app = page_number * 5 - 5;
+                int page_number = atoi(firstParam);  // take the page number
+                int first_app = page_number * 5 - 5; //5 apps per page
                 int line_index = 0, count = 5;
                 int size = sizeOfFile(apps_file);
                 char returnedString[size] = ""; //a string with all apps
 
                 for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
                 {
-                    if (line_index == first_app)
+                    if (line_index == first_app) //find the first app wanted
                     {
-                        if (count > 0)
+                        if (count > 0) // take the 5 apps wanted in returned string
                         {
                             char *output_string = app->toString();
                             strcat(returnedString, output_string);
@@ -580,7 +578,7 @@ void handler_client(int client_fd, char *msg)
                 }
                 if (strlen(returnedString) < 1)
                 {
-                    strcpy(msg, "No apps avaible");
+                    strcpy(msg, "No apps avaible\n");
                     writeInSocket(msg, client_fd);
                 }
                 else
@@ -588,7 +586,7 @@ void handler_client(int client_fd, char *msg)
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
@@ -608,7 +606,7 @@ void handler_client(int client_fd, char *msg)
                         {
                             found = 1;
                             if (strcmp(app->src_file, "default") == 0) // check if the app is open source
-                                strcpy(msg, "this app is not open source ");
+                                strcpy(msg, "this app is not open source\n");
                             else
                             {
                                 strcpy(msg, app->src_file);
@@ -616,25 +614,25 @@ void handler_client(int client_fd, char *msg)
                         }
                     }
                     if (found == 0)
-                        strcpy(msg, "app doesn't exist");
+                        strcpy(msg, "app doesn't exist\n");
 
                     writeInSocket(msg, client_fd);
                 }
                 else
                 {
-                    strcpy(msg, "You are not logged in");
+                    strcpy(msg, "You are not logged in\n");
                     writeInSocket(msg, client_fd);
                 }
             }
             else
             {
-                strcpy(msg, "incorrect number of parameters");
+                strcpy(msg, "incorrect number of parameters\n");
                 writeInSocket(msg, client_fd);
             }
         }
         else
         {
-            strcpy(msg, "command doesn't exist!");
+            strcpy(msg, "command doesn't exist!\n");
             writeInSocket(msg, client_fd);
         }
     }
@@ -644,7 +642,7 @@ char *getInputCommand(char *inputString) //command:parameters*
 
     char *subString;
     subString = strrchr(inputString, ':') + 1;
-    subString[strlen(subString) - 1] = '\0';
+    // subString[strlen(subString) - 1] = '\0';
     return subString;
 }
 
@@ -864,6 +862,8 @@ bool isValidField(char *field, char *value, AppDetails app)
 int validParameters(char *inputString, int number)
 {
     int size = strlen(inputString);
+    inputString[size - 1] = '\0';
+
     int count_space = 0;
     int count_param = 0, j = 0;
     for (int i = 0; i < size; i++)
@@ -879,16 +879,14 @@ int validParameters(char *inputString, int number)
     {
         for (int i = j + 1; i < size; i++)
         {
-            printf("text:<%c>\n", inputString[i]);
-
-            if (inputString[i] != ' ' && inputString[i] != '\n')
+            if (inputString[i] != '\0')
                 count_param++;
         }
     }
-    printf("count_param: %d\n", count_param);
+
     if (number == 0)
     {
-        if (count_param > 1)
+        if (count_param > 0)
             return 1;
     }
     else

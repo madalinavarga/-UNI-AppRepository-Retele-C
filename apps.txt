@@ -1,0 +1,2 @@
+0;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;free;1.0GB;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/0/update.txt;
+2;madalina;App144;aceasta este o aplicatie noua;author1;www.home.ro;windows linux;freE;MAAAA;20.2;special;/home/madalinavarga21/Desktop/Retele/ProiectFinal/fisiere_salvate/2/config.txt;
