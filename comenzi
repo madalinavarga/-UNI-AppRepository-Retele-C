@@ -1,3 +1,12 @@
++de refacut delete 
+
++de revazul la update de ce ramane in urma printf 
++parametrii 
+
+done today :  seeAllApps 
+
+
+
 make
 ./server
 ./client 127.0.0.1 4447 
@@ -44,16 +53,5 @@ delete
 download
 default
 
-+de refacut delete si seeAllApps 
 
 
-
-
-
-rezolvate
--toate aplicatiile 
--client abandoneaza brusc 
-- delete 
--id aplicatie resetat la orice rerulare (setat id clasa =id_global. la fiecare while iau ultimul id si il asignez lui id_g)
-
--+probleme update cu numele utilizatorului ( am schimbat delimitatorii) check again

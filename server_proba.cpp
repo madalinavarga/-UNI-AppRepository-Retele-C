@@ -15,7 +15,7 @@
 #include <list>
 #define FALSE 0
 #define TRUE 1
-#define PORT 4002
+#define PORT 4001
 #define SIZE 1000
 
 char config_file[] = "config.txt";
@@ -329,7 +329,7 @@ void handler_client(int client_fd, char *msg)
 
                                 char old_file[256]; //take the old file path
                                 strcpy(old_file, app->src_file);
-                                printf("lungimee:\n %d", strlen(app->src_file));
+                                // printf("lungimee:\n %d", strlen(app->src_file));
                                 app->setFromtxtFile(fileUpdate); //reset the attributes
 
                                 char path_server[256];
@@ -488,16 +488,30 @@ void handler_client(int client_fd, char *msg)
                 writeInSocket(msg, client_fd);
             }
         }
-        else if (strstr(msg, "seeAllApps"))
+        else if (strstr(msg, "seeAllApps:"))
         {
+            char *firstParam = getInputCommand(msg);
+            int page_number = atoi(firstParam);
+            int first_app = page_number * 5 - 5; // give the apps between line first and last
+            int line_index = 0, count = 5;
             int size = sizeOfFile(apps_file);
             char returnedString[size] = ""; //a string with all apps
 
             for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
             {
-                char *output_string = app->toString();
-                strcat(returnedString, output_string);
-                strcat(returnedString, "\n");
+                if (line_index == first_app)
+                {
+                    if (count > 0)
+                    {
+                        char *output_string = app->toString();
+                        strcat(returnedString, output_string);
+                        strcat(returnedString, "\n");
+                    }
+
+                    first_app++;
+                    count--;
+                }
+                line_index++;
             }
             if (strlen(returnedString) < 1)
             {
