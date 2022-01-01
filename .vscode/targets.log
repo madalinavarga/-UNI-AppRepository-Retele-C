@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Dec 30 06:18:58 2021
+# Make data base, printed on Sat Jan  1 09:29:01 2022
 
 # Variables
 
@@ -87,7 +87,7 @@ PATH = /home/madalinavarga21/.local/bin:/home/madalinavarga21/anaconda3/bin:/hom
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
-SESSION_MANAGER = local/madalinavarga21-X555LJ:@/tmp/.ICE-unix/1153,unix/madalinavarga21-X555LJ:/tmp/.ICE-unix/1153
+SESSION_MANAGER = local/madalinavarga21-X555LJ:@/tmp/.ICE-unix/1095,unix/madalinavarga21-X555LJ:/tmp/.ICE-unix/1095
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -105,7 +105,7 @@ XDG_SESSION_DESKTOP = mate
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 3631
+GIO_LAUNCHED_DESKTOP_FILE_PID = 1656
 # automatic
 %F = $(notdir $%)
 # environment
@@ -123,7 +123,7 @@ QT_QPA_PLATFORMTHEME = qt5ct
 # environment
 XDG_SEAT = seat0
 # environment
-SSH_AGENT_PID = 1237
+SSH_AGENT_PID = 1180
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = MATE
 # environment
@@ -163,7 +163,7 @@ QT_IM_MODULE = ibus
 # environment
 SHLVL = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-394ff86f-4abc-4a83-85e2-4f327d3439bd.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-3a5829a5-01dc-42e6-93c2-59eadf917c50.sock
 # environment
 COMPIZ_CONFIG_PROFILE = mint
 # environment
@@ -245,7 +245,7 @@ LC_ADDRESS = ro_RO.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 3631
+VSCODE_PID = 1656
 # variable set hash-table stats:
 # Load=118/1024=12%, Rehash=0, Collisions=11/146=8%
 
@@ -277,6 +277,7 @@ all:
 # automatic
 # % := 
 # automatic
+ 
 # * := 
 # automatic
 # + := 
@@ -289,7 +290,6 @@ all:
 # automatic
 # ? := 
 # variable set hash-table stats:
- 
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
 #  recipe to execute (from 'Makefile', line 2):
 		g++ server_proba.cpp -o server
@@ -335,6 +335,6 @@ clean:
 # strcache performance: lookups = 37 / hit rate = 21%
 # hash-table stats:
 # Load=29/8192=0%, Rehash=0, Collisions=2/37=5%
-# Finished Make data base on Thu Dec 30 06:18:58 2021
+# Finished Make data base on Sat Jan  1 09:29:01 2022
 
  

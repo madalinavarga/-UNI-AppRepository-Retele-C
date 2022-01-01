@@ -4,28 +4,28 @@ make
 
 Comenzi posibile 
 logout
-logout => eroare daca nu este nimeni logat, sau deconectare utilizator
+-logout => eroare daca nu este nimeni logat, sau deconectare utilizator
 
-login:nume parola
-login:utilizator parola => gresita => eroare 
+login:utilizator parola
+-login:utilizator parola => gresita => eroare 
       utilizator fara parola => eroare 
       utilizator parola ok => conectare 
       utilizator parola ok dar deja logat => eroare 
 
 quit
-quit=>clientul se deconecteaza 
+-quit=>clientul se deconecteaza 
 
 newUser:nume parola
-newUser:utilizator existent => eroare 
+-newUser:utilizator existent => eroare 
         utilizator ok parola incorecta ( 8 caractere + o litera mare +1 nr) => eroare 
         utilizator ok parola ok => creaza cont + salveaza in fisier 
 
 addNewApp:fisier.json ! de modificat 
-addNewApp: utilizatorul nu este logat=>eroare 
+-addNewApp: utilizatorul nu este logat=>eroare 
            utilizator logat => ok 
 
 update:id fisier.json           
-update   : utilizator nu este logat=> eroare 
+-update   : utilizator nu este logat=> eroare 
            utilizator logat id dat nu exista => eroare
            utilizator logat id dat exista + nu este autorul=>eroare
            utilizator logat id dat exista + este autorul=>ok
@@ -34,14 +34,18 @@ searchApps:fisier
 searchApps: exista app cu filtre date => returneaza detaliile despre aplicatie 
             nu exista => mesaj nu exista 
 
-seeApp:id
+-seeApp:id
 seeApp: id existent => returneaza detaliile
         id invalid=> mesaj eroare 
-ctrl+C => handle signal => deconectare client 
+-ctrl+C => handle signal => deconectare client 
 
+-seeAllApps
+delete
+download
+default
 
-+de verificat ca imi ofera parametrii 
-+de facut open source 
++de refacut delete si seeAllApps 
+
 
 
 

@@ -5,16 +5,19 @@ Adaugarea de noi aplicatii se va putea realiza de oricare client, specificindu-s
   diverse criterii (nume, cerinte, producator, statut - open source, freeware, shareware etc.).*/
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <netdb.h>
 #include <string.h>
-#include <signal.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <iostream>
+#include <arpa/inet.h>
 #define SIZE 1000
 
 int port;
@@ -22,6 +25,7 @@ int socket_descriptor;
 void writeInSocket(char buffer[], int fd);
 void readFromSocket(char *buff, int fd);
 void handle_signal(int sig);
+char *readFile(char *file);
 
 int main(int argc, char *argv[])
 {
@@ -56,11 +60,14 @@ int main(int argc, char *argv[])
     signal(SIGINT, handle_signal);
     while (1)
     {
+        int check_download = 0;
         bzero(msg, SIZE);
         printf("[client]Introduceti comanda: ");
         fflush(stdout);
         read(0, msg, SIZE);
         writeInSocket(msg, socket_descriptor);
+        if (strstr(msg, "downloadApp:"))
+            check_download = 1;
         readFromSocket(msg, socket_descriptor);
         printf("[client]Mesajul primit este: %s\n", msg);
         if (strstr(msg, "quit"))
@@ -68,6 +75,20 @@ int main(int argc, char *argv[])
             printf("[client]Mesajul primit este: %s.Byeeee\n", msg);
             close(socket_descriptor);
             exit(0);
+        }
+        if (check_download == 1)
+        {
+            char local_path[256] = "./";
+            char *contentFile = readFile(msg);
+            int size = strlen(contentFile); // save the size of the content of file
+
+            char *nameOfFile;
+            nameOfFile = strrchr(msg, '/') + 1;
+
+            strcat(local_path, nameOfFile); //add to path
+
+            int open_fd = open(local_path, O_CREAT | O_WRONLY | O_TRUNC, 0777); //create file
+            write(open_fd, contentFile, size);
         }
     }
     close(socket_descriptor);
@@ -100,4 +121,22 @@ void handle_signal(int sig)
     writeInSocket(msg, socket_descriptor);
     readFromSocket(msg, socket_descriptor);
     exit(0);
+}
+char *readFile(char *file)
+{
+    FILE *file_fd;
+    if ((file_fd = fopen(file, "r")) == NULL)
+        printf("eroare deschidere fisier\n"); //open file in read mode
+
+    fseek(file_fd, 0, SEEK_END);     //change the position at the end of the file
+    long file_size = ftell(file_fd); //take the position
+    fseek(file_fd, 0, SEEK_SET);     //go back at the beginning of the file
+
+    char *fileContent = (char *)malloc(file_size + 1);
+    fread(fileContent, 1, file_size, file_fd); //read the content
+    fclose(file_fd);
+
+    fileContent[file_size] = 0;
+
+    return fileContent;
 }
