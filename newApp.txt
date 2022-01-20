@@ -1,10 +1,10 @@
-name:App144
+name:Versiune10
 about:aceasta este o aplicatie noua
 author:author1
 websiteLink:www.home.ro
 systemRequirements:windows linux
 price:free
 ramMemory:1.0GB
-version:20.2
+version:10
 otherDetails:special
 src_file:/home/madalinavarga21/Desktop/Retele/ProiectFinal/update.txt

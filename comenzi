@@ -1,4 +1,5 @@
 
+
 make
 ./server
 ./client 127.0.0.1 4447 
@@ -31,7 +32,7 @@ update:id fisier.json
            utilizator logat id dat exista + nu este autorul=>eroare
            utilizator logat id dat exista + este autorul=>ok
 
-searchApps:fisier
+-searchApps:fisier
 searchApps: exista app cu filtre date => returneaza detaliile despre aplicatie 
             nu exista => mesaj nu exista 
 
@@ -41,9 +42,9 @@ seeApp: id existent => returneaza detaliile
 -ctrl+C => handle signal => deconectare client 
 
 -seeAllApps
-delete
-download
-default
+-delete
+-download
+-default
 
 
 

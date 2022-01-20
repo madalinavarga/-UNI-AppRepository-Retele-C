@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jan  1 09:29:01 2022
+# Make data base, printed on Thu Jan 20 10:56:44 2022
 
 # Variables
 
@@ -87,7 +87,7 @@ PATH = /home/madalinavarga21/.local/bin:/home/madalinavarga21/anaconda3/bin:/hom
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
-SESSION_MANAGER = local/madalinavarga21-X555LJ:@/tmp/.ICE-unix/1095,unix/madalinavarga21-X555LJ:/tmp/.ICE-unix/1095
+SESSION_MANAGER = local/madalinavarga21-X555LJ:@/tmp/.ICE-unix/21833,unix/madalinavarga21-X555LJ:/tmp/.ICE-unix/21833
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -105,7 +105,7 @@ XDG_SESSION_DESKTOP = mate
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 1656
+GIO_LAUNCHED_DESKTOP_FILE_PID = 35820
 # automatic
 %F = $(notdir $%)
 # environment
@@ -123,7 +123,7 @@ QT_QPA_PLATFORMTHEME = qt5ct
 # environment
 XDG_SEAT = seat0
 # environment
-SSH_AGENT_PID = 1180
+SSH_AGENT_PID = 22006
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = MATE
 # environment
@@ -163,7 +163,7 @@ QT_IM_MODULE = ibus
 # environment
 SHLVL = 0
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-3a5829a5-01dc-42e6-93c2-59eadf917c50.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-26eb1e71-d4b4-4015-aae4-a15b81592fca.sock
 # environment
 COMPIZ_CONFIG_PROFILE = mint
 # environment
@@ -245,7 +245,7 @@ LC_ADDRESS = ro_RO.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1656
+VSCODE_PID = 35820
 # variable set hash-table stats:
 # Load=118/1024=12%, Rehash=0, Collisions=11/146=8%
 
@@ -255,9 +255,9 @@ VSCODE_PID = 1656
 
 # Directories
 
-# . (device 2054, inode 3295955): 23 files, no impossibilities.
+# . (device 2054, inode 3295955): 20 files, no impossibilities.
 
-# 23 files, no impossibilities in 1 directories.
+# 20 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -292,7 +292,7 @@ all:
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/11=9%
 #  recipe to execute (from 'Makefile', line 2):
-		g++ server_proba.cpp -o server
+		g++ server.cpp -o server
 		g++ client.cpp -o client
 
 # Not a target:
@@ -304,7 +304,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2021-12-28 09:27:58.048678467
+#  Last modified 2022-01-05 13:32:02.266924003
 #  File has been updated.
 #  Successfully updated.
 
@@ -329,12 +329,12 @@ clean:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 29 / storage = 281 B / avg = 9 B
-# current buf: size = 8162 B / used = 281 B / count = 29 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 26 / storage = 249 B / avg = 9 B
+# current buf: size = 8162 B / used = 249 B / count = 26 / avg = 9 B
 
-# strcache performance: lookups = 37 / hit rate = 21%
+# strcache performance: lookups = 34 / hit rate = 23%
 # hash-table stats:
-# Load=29/8192=0%, Rehash=0, Collisions=2/37=5%
-# Finished Make data base on Sat Jan  1 09:29:01 2022
+# Load=26/8192=0%, Rehash=0, Collisions=2/34=6%
+# Finished Make data base on Thu Jan 20 10:56:44 2022
 
  

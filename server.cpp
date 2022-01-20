@@ -73,10 +73,6 @@ int main(int argc, char *argv[])
     int sd;
     char msg[SIZE];
 
-    //reuse
-    int on = 1;
-    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-
     if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         perror("[server]Eroare la socket().\n");
@@ -143,6 +139,7 @@ void handler_client(int client_fd, char *msg)
     int isLogged = FALSE;
     while (1)
     {
+
         bzero(msg, SIZE);
         list<AppDetails> listOfApps = getListOfApps(); //create list of all apps uploaded
         id_g = listOfApps.end()->id;                   //set the last id nr
@@ -163,13 +160,14 @@ void handler_client(int client_fd, char *msg)
                 if (isLogged == FALSE)
                 {
                     strcpy(userName, " ");
-                    char *userAccountDetails = getInputCommand(msg);   // return username password
-                    int found = checkExistingUser(userAccountDetails); // search if username and password exists
-                    if (found != 0)                                    //yes
+                    char *userAccountDetails = getInputCommand(msg); // return username password
+                    int found = checkExistingUser(userAccountDetails);
+                    if (found != 0) //yes
                     {
 
                         isLogged = TRUE;
-                        char *user_ptr = getFirstParameter(userAccountDetails); // save the username for next requests
+                        // save the username for next requests
+                        char *user_ptr = getFirstParameter(userAccountDetails);
                         strcpy(userName, user_ptr);
                         strcpy(msg, "Logged in\n");
                         writeInSocket(msg, client_fd); // return succes msg
@@ -235,7 +233,7 @@ void handler_client(int client_fd, char *msg)
 
                         char *nameOfFile;
                         nameOfFile = strrchr(app.src_file, '/') + 1;
-                        printf("nume returnat: %s", nameOfFile);
+                        //printf("nume returnat: %s", nameOfFile);
 
                         strcat(path_server, nameOfFile); //add to path
                         app.src_file = (char *)malloc(strlen(path_server));
@@ -277,10 +275,8 @@ void handler_client(int client_fd, char *msg)
                 if (found == 0)
                 {
                     // the wanted username is avaible => continue
-
                     char *password = getSecondParameter(new_user_details);
                     int check_password = validPassword(password);
-
                     if (check_password == 1)
                     {
                         //good pass => create account
@@ -348,7 +344,7 @@ void handler_client(int client_fd, char *msg)
                     int found = 0, unathorised = 0;
                     FILE *file_fd = fopen(apps_file, "w+");
                     fseek(file_fd, 0, SEEK_SET);
-                    for (auto app = listOfApps.begin(); app != listOfApps.end(); app++) //fie sterg tot si scriu iar.. fie parcurg lista de 2 ori?!
+                    for (auto app = listOfApps.begin(); app != listOfApps.end(); app++)
                     {
                         if (app->id == id) // check if the id is in the list
                         {
@@ -452,7 +448,6 @@ void handler_client(int client_fd, char *msg)
                         strcat(returnedString, "\n\n");
                     }
                 }
-
                 if (foundOneApp == false)
                 {
                     strcpy(returnedString, "Didn't find any app\n");
@@ -518,7 +513,6 @@ void handler_client(int client_fd, char *msg)
                                 {
                                     remove(path_file);
                                 }
-
                                 found = 1;
                                 strcpy(msg, "app deleted\n");
                             }
@@ -648,13 +642,8 @@ char *getInputCommand(char *inputString) //command:parameters*
 
 int checkExistingUser(char *usernamesAndPassword)
 {
-    if (strstr(usernamesAndPassword, " ") == NULL) // only one parameter
-    {
-        return 0;
-    }
 
     strcat(usernamesAndPassword, "\n");
-
     char *listOfUsernamesAndPasswords = readFile(config_file); //madalina parola
     if (strstr(listOfUsernamesAndPasswords, usernamesAndPassword) != NULL)
     {
